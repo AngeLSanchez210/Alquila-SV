@@ -6,8 +6,15 @@ import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
+import Swiper from 'swiper';
 
-// Extend ImportMeta interface for Vite...
+declare global {
+  interface Window {
+    Swiper: typeof Swiper;
+  }
+}
+window.Swiper = Swiper;
+
 declare module 'vite/client' {
     interface ImportMetaEnv {
         readonly VITE_APP_NAME: string;
@@ -20,7 +27,7 @@ declare module 'vite/client' {
     }
 }
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Alquilasv';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
