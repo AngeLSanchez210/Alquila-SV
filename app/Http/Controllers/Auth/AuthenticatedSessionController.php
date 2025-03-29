@@ -31,19 +31,21 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate(); 
         $request->session()->regenerate(); 
-
-       
+    
         $user = $request->user();
-
-        
+    
+       
+        if (!$user) {
+            return redirect()->route('home')->withErrors(['error' => 'No se pudo autenticar al usuario.']);
+        }
+    
         if ($user->role === 'Admin') {
-           
             return redirect()->route('dashboard'); 
         }
-
-        
+    
         return redirect()->route('principal'); 
     }
+    
 
     /**
      * Destroy an authenticated session.
