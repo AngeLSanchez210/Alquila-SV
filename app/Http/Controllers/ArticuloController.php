@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Articulo;
+use App\Models\ImgArticulo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ArticuloController extends Controller
 {
@@ -47,5 +49,28 @@ class ArticuloController extends Controller
     {
         $articulo->delete();
         return response()->noContent();
+    }
+
+    public function uploadImages(Request $request, Articulo $articulo)
+    {
+        $request->validate([
+            'images' => 'required|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $uploadedImages = [];
+        foreach ($request->file('images') as $image) {
+            $filename = uniqid() . '.' . $image->getClientOriginalExtension();
+            $path = $image->storeAs('public/articulos', $filename);
+
+            $imgArticulo = ImgArticulo::create([
+                'articulo_id' => $articulo->id,
+                'link' => Storage::url($path),
+            ]);
+
+            $uploadedImages[] = $imgArticulo;
+        }
+
+        return response()->json($uploadedImages, 201);
     }
 }
