@@ -17,6 +17,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Principal', href: '/principal' },
 ];
 
+
+
 const products = ref<Product[]>([]);
 const categories = ref<{ id: number, name: string }[]>([]);
 
@@ -51,6 +53,10 @@ const searchProducts = () => {
 const viewProductDetails = (id: number) => {
     window.location.href = `/product/${id}`;
 };
+
+const navigateToAddArticles = () => {
+    window.location.href = '/addArticles';  // Cambia la ruta si es necesario
+};
 </script>
 
 <template>
@@ -69,6 +75,7 @@ const viewProductDetails = (id: number) => {
                         class="p-2 border rounded w-full"
                     />
                 </div>
+                
 
                 <!-- Filtros -->
                 <div class="filters mb-4">
@@ -102,6 +109,16 @@ const viewProductDetails = (id: number) => {
                             Ver detalles
                         </button>
                     </div>
+                </div>
+
+                
+                <div class="mt-6">
+                    <button 
+                        @click="navigateToAddArticles" 
+                        class="bg-green-600 text-white px-4 py-2 rounded"
+                    >
+                        Agregar Artículo
+                    </button>
                 </div>
             </div>
         </div>
