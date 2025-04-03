@@ -7,7 +7,7 @@ use App\Http\Controllers\ArticuloController;
 
 // Ruta de inicio
 Route::get('/', function () {
-    return Inertia::render('Welcome');
+    return Inertia::render('Home');
 })->name('home');
 
 // Ruta del dashboard del usuario
