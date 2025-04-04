@@ -23,39 +23,39 @@ class ArticuloController extends Controller
     }
 
 
-public function store(Request $request)
-{
-    // Validación de datos
-    $data = $request->validate([
-        'nombre' => 'required|string',
-        'descripcion' => 'required|string',
-        'precio' => 'required|numeric',
-        'estado' => 'required|in:disponible,alquilado',
-        'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    $articulo = Articulo::create([
-        'nombre' => $data['nombre'],
-        'descripcion' => $data['descripcion'],
-        'precio' => $data['precio'],
-        'estado' => $data['estado'],
-        'usuario_id' => auth()->id(),
-    ]);
-
-   
-    if ($request->hasFile('imagen')) {
-        $imagePath = $request->file('imagen')->store('articulos', 'public');
-        ImgArticulo::create([
-            'articulo_id' => $articulo->id,
-            'link' => $imagePath,
+    public function store(Request $request)
+    {
+        
+        $data = $request->validate([
+            'nombre' => 'required|string',
+            'descripcion' => 'required|string',
+            'precio' => 'required|numeric',
+            'estado' => 'required|in:disponible,alquilado',
+            'imagenes.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validar múltiples imágenes
         ]);
+    
+       
+        $articulo = Articulo::create([
+            'nombre' => $data['nombre'],
+            'descripcion' => $data['descripcion'],
+            'precio' => $data['precio'],
+            'estado' => $data['estado'],
+            'usuario_id' => auth()->id(),
+        ]);
+    
+        
+        if ($request->hasFile('imagenes')) {
+            foreach ($request->file('imagenes') as $imagen) {
+                $imagePath = $imagen->store('articulos', 'public');
+                ImgArticulo::create([
+                    'articulo_id' => $articulo->id,
+                    'link' => $imagePath,
+                ]);
+            }
+        }
+    
+        return redirect()->route('articulos')->with('success', 'Artículo creado con éxito.');
     }
-
-    // Redirigir despues de crear el artículo
-    return Inertia::render('Principal', [
-        'message' => 'Artículo creado correctamente', 
-    ]);
-}
 
 
     public function show(Articulo $articulo)

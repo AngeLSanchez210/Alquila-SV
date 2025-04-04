@@ -8,17 +8,15 @@ const form = ref({
     descripcion: '',
     precio: '',
     estado: 'disponible',
-    imagen: null as File | null,
+    imagenes: [] as File[], // Cambiado a un array para múltiples imágenes
 });
-
 
 const onFileChange = (event: Event) => {
     const fileInput = event.target as HTMLInputElement;
     if (fileInput.files && fileInput.files.length > 0) {
-        form.value.imagen = fileInput.files[0];
+        form.value.imagenes = Array.from(fileInput.files); // Convertir FileList a un array
     }
 };
-
 
 const submit = () => {
     const formData = new FormData();
@@ -27,12 +25,11 @@ const submit = () => {
     formData.append('precio', form.value.precio);
     formData.append('estado', form.value.estado);
 
-    
-    if (form.value.imagen instanceof File) {
-        formData.append('imagen', form.value.imagen);
-    }
+    // Agregar múltiples imágenes al FormData
+    form.value.imagenes.forEach((imagen, index) => {
+        formData.append(`imagenes[${index}]`, imagen);
+    });
 
-   
     router.post('/articulos', formData);
 };
 </script>
@@ -62,8 +59,8 @@ const submit = () => {
                     </select>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-gray-700">Imagen</label>
-                    <input type="file" @change="onFileChange" class="w-full border p-2 rounded">
+                    <label class="block text-gray-700">Imágenes</label>
+                    <input type="file" @change="onFileChange" class="w-full border p-2 rounded" multiple>
                 </div>
                 <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">
                     Guardar Artículo
