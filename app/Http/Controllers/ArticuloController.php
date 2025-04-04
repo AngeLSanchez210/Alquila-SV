@@ -13,7 +13,8 @@ class ArticuloController extends Controller
 {
     public function index()
     {
-        return Articulo::with('categorias', 'usuario', 'imagenes')->get();
+        $articulos = Articulo::with('imagenes')->get();
+        return response()->json($articulos);
     }
 
     public function create()

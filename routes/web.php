@@ -37,6 +37,9 @@ Route::get('/articulos', function () {
     return Inertia::render('ArticulosView');
 })->name('articulos');
 
+// Ruta para obtener el JSON de los artículos
+Route::get('/api/articulos', [ArticuloController::class, 'index'])->name('api.articulos');
+
 // Ruta para crear un nuevo artículo
 Route::get('/articulos/create', function () {
     return Inertia::render('AddArticles');
@@ -45,8 +48,6 @@ Route::get('/articulos/create', function () {
 Route::get('/addArticles', function () {
     return Inertia::render('addArticles');  
 })->middleware(['auth', 'verified'])->name('addArticles');
-
-Route::post('/articulos', [ArticuloController::class, 'store']);
 
 // Ruta para almacenar artículos
 Route::post('/articulos', [ArticuloController::class, 'store'])->name('articulos.store');
