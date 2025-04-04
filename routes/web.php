@@ -32,6 +32,10 @@ Route::get('/users', [UserController::class, 'index']);
 Route::post('/articulos/{articulo}/images', [ArticuloController::class, 'uploadImages']);
 Route::post('/articulos', [ArticuloController::class, 'store']);
 
+// Ruta para la vista de artículos
+Route::get('/articulos', function () {
+    return Inertia::render('ArticulosView');
+})->name('articulos');
 
 // Ruta para crear un nuevo artículo
 Route::get('/articulos/create', function () {
@@ -41,8 +45,6 @@ Route::get('/articulos/create', function () {
 Route::get('/addArticles', function () {
     return Inertia::render('addArticles');  
 })->middleware(['auth', 'verified'])->name('addArticles');
-
-
 
 Route::post('/articulos', [ArticuloController::class, 'store']);
 
