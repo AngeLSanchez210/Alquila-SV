@@ -21,9 +21,9 @@ Route::get('/admin/dashboard', function () {
 })->middleware(['auth', 'verified', 'role:Admin'])->name('admin.dashboard');
 
 // Ruta principal de la aplicación
-Route::get('/principal', function () {
-    return Inertia::render('Principal');
-})->middleware(['auth', 'verified'])->name('principal');
+Route::get('/home', function () {
+    return Inertia::render('home');
+})->middleware(['auth', 'verified'])->name('home');
 
 // Ruta para los usuarios
 Route::get('/users', [UserController::class, 'index']);
