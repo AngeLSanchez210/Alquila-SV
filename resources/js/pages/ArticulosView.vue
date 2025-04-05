@@ -47,7 +47,7 @@ onMounted(() => {
   <!-- Sección de Productos -->
   <section class="flex flex-col lg:flex-row gap-6 bg-gray-100 p-16 text-gray-900">
     <!-- Filtros -->
-    <div class="w-full lg:w-80 space-y-6 bg-white p-6 rounded-lg shadow-sm">
+    <div class="w-full lg:w-80  space-y-6 bg-white p-6 rounded-lg shadow-sm max-h-fit">
       <h3 class="text-lg font-semibold mb-4 text-gray-900">Filtros</h3>
       
       <!-- Filtro de precio -->
@@ -81,6 +81,29 @@ onMounted(() => {
           </div>
         </div>
       </div>
+
+      <!-- Filtro de categorias -->
+      <div class="border-t pt-6">
+           <h4 class="text-sm font-medium mb-3">Categorías</h4>
+           <div class="space-y-2">
+             <label class="flex items-center gap-2">
+               <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
+               <span class="text-sm">Camisetas</span>
+             </label>
+             <label class="flex items-center gap-2">
+               <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
+               <span class="text-sm">Pantalones</span>
+             </label>
+             <label class="flex items-center gap-2">
+               <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
+               <span class="text-sm">Sudaderas</span>
+             </label>
+             <label class="flex items-center gap-2">
+               <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
+               <span class="text-sm">Accesorios</span>
+             </label>
+            </div>
+          </div>
     </div>
 
     <!-- Productos -->
@@ -88,7 +111,7 @@ onMounted(() => {
       <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
         <h2 class="text-2xl font-bold tracking-tight text-gray-900">Mostrando artículos</h2>
 
-        <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+        <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
           <div v-for="articulo in articulos" :key="articulo.id" class="group relative">
 
             <!-- Carrusel de imágenes -->
