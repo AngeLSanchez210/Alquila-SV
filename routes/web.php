@@ -13,17 +13,17 @@ Route::get('/', function () {
 // Ruta del dashboard del usuario
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified' ,'role:Admin'])->name('dashboard');
 
 // Ruta del dashboard de administrador
 Route::get('/admin/dashboard', function () {
     return Inertia::render('AdminDashboard');
 })->middleware(['auth', 'verified', 'role:Admin'])->name('admin.dashboard');
 
-// Ruta principal de la aplicación
-Route::get('/home', function () {
-    return Inertia::render('home');
-})->middleware(['auth', 'verified'])->name('home');
+// // Ruta principal de la aplicación
+// Route::get('/home', function () {
+//     return Inertia::render('home');
+// })->middleware(['auth', 'verified'])->name('home');
 
 // Ruta para los usuarios
 Route::get('/users', [UserController::class, 'index']);
