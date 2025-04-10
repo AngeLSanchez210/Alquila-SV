@@ -29,24 +29,29 @@ class RegisteredUserController extends Controller
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-    
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'user', 
-        ]);
-    
-        event(new Registered($user));
-        Auth::login($user);
-    
-        return to_route($user->role === 'Admin' ? 'dashboard' : 'home');
-    }
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        'direccion' => 'nullable|string|max:255',
+        'telefono' => 'nullable|string|max:20',
+    ]);
+
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'direccion' => $request->direccion,
+        'telefono' => $request->telefono,
+        'role' => 'user',
+    ]);
+
+    event(new Registered($user));
+    Auth::login($user);
+
+    return to_route($user->role === 'Admin' ? 'dashboard' : 'home');
+}
+
     
 }
