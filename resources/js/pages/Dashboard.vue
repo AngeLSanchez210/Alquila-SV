@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -15,10 +15,22 @@ interface User {
 }
 
 const users = ref<User[]>([]);
+const searchTerm = ref('');
 
 onMounted(async () => {
   const response = await axios.get('/users');
   users.value = response.data;
+});
+
+const filteredUsers = computed(() => {
+  if (!searchTerm.value) return users.value;
+  
+  const term = searchTerm.value.toLowerCase();
+  return users.value.filter(user => 
+    user.name.toLowerCase().includes(term) || 
+    user.email.toLowerCase().includes(term) || 
+    (user.role && user.role.toLowerCase().includes(term))
+  );
 });
 
 const deleteUser = async (id: number) => {
@@ -111,6 +123,21 @@ const openEditModal = (user: User) => {
         </button>
       </div>
 
+      <!-- Componente de búsqueda -->
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <input
+          v-model="searchTerm"
+          type="search"
+          class="bg-white/5 backdrop-blur-md border border-white/10 text-white placeholder-gray-400 text-sm rounded-lg block w-full pl-10 p-2.5 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="Buscar usuarios por nombre, correo o rol..."
+        />
+      </div>
+
       <div class="overflow-hidden rounded-xl shadow ring-1 ring-white/10 bg-white/5 backdrop-blur-md">
         <table class="min-w-full divide-y divide-white/10 text-sm text-white">
           <thead class="bg-white/10">
@@ -123,7 +150,7 @@ const openEditModal = (user: User) => {
           </thead>
           <tbody>
             <tr
-              v-for="user in users"
+              v-for="user in filteredUsers"
               :key="user.id"
               class="hover:bg-white/5 transition duration-200"
             >
@@ -145,9 +172,9 @@ const openEditModal = (user: User) => {
                 </button>
               </td>
             </tr>
-            <tr v-if="users.length === 0">
+            <tr v-if="filteredUsers.length === 0">
               <td colspan="4" class="text-center py-6 text-gray-400">
-                No hay usuarios disponibles.
+                No hay usuarios disponibles{{ searchTerm ? ' con esa búsqueda' : '' }}.
               </td>
             </tr>
           </tbody>
