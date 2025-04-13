@@ -13,12 +13,13 @@ Route::get('/', function () {
 // Ruta del dashboard del usuario
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified', 'role:Admin'])->name('dashboard');
+})->middleware(['auth', 'verified' ])->name('dashboard');
 
 // Ruta del dashboard de administrador
 Route::get('/admin/dashboard', function () {
     return Inertia::render('AdminDashboard');
 })->middleware(['auth', 'verified', 'role:Admin'])->name('admin.dashboard');
+
 
 // ADMIN ELIMINAR E EDITAR USUARIOS
 // Ruta para crear un nuevo usuario
@@ -55,6 +56,20 @@ Route::get('/articulos/create', function () {
 
 // Ruta para almacenar artículos
 Route::post('/articulos', [ArticuloController::class, 'store'])->name('articulos.store');
+
+
+
+//ADMIN PANEL
+Route::get('/admin/users', function () {
+    return Inertia::render('admin/adminUsers'); 
+})->name('admin.users');
+
+Route::get('/admin/items', function () {
+    return Inertia::render('admin/adminArticles'); 
+})->name('admin.items');
+
+
+
 
 // Archivos de configuración y autenticación
 require __DIR__.'/settings.php';

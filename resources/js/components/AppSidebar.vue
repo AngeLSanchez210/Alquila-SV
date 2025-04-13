@@ -12,7 +12,7 @@ import {
   SidebarMenuItem
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3'; // Usamos Link de Inertia.js
 import { Users, Box, Settings } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
@@ -20,12 +20,12 @@ import AppLogo from './AppLogo.vue';
 const mainNavItems: NavItem[] = [
   {
     title: 'Usuarios',
-    href: '/admin/users',
+    href: route('admin.users'), 
     icon: Users,
   },
   {
     title: 'Artículos',
-    href: '/admin/items',
+    href: route('admin.items'), 
     icon: Box,
   },
   {
@@ -34,8 +34,6 @@ const mainNavItems: NavItem[] = [
     icon: Settings,
   },
 ];
-
-// Ya no necesitamos enlaces externos, así que eliminamos el footerNavItems
 </script>
 
 <template>
