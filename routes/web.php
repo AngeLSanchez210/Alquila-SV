@@ -21,6 +21,9 @@ Route::get('/admin/dashboard', function () {
 })->middleware(['auth', 'verified', 'role:Admin'])->name('admin.dashboard');
 
 // ADMIN ELIMINAR E EDITAR USUARIOS
+// Ruta para crear un nuevo usuario
+Route::post('/users', [UserController::class, 'store'])->name('users.store');
+
 // Mostrar listado de usuarios
 Route::get('/users', [UserController::class, 'index'])->name('users.index');
 

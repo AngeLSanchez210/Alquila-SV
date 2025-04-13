@@ -106,6 +106,54 @@ const openEditModal = (user: User) => {
     },
   });
 };
+
+
+const openCreateModal = () => {
+  Swal.fire({
+    title: 'Crear Usuario',
+    html:
+      `<input id="swal-name" class="swal2-input" placeholder="Nombre">` +
+      `<input id="swal-email" class="swal2-input" placeholder="Correo">` +
+      `<input id="swal-password" type="password" class="swal2-input" placeholder="Contraseña">` +
+      `<small style="display: block; margin-top: -10px; margin-bottom: 10px; color: #ccc;">La contraseña se podrá cambiar luego</small>` +
+      `<input id="swal-direccion" class="swal2-input" placeholder="Dirección">` +
+      `<input id="swal-telefono" class="swal2-input" placeholder="Teléfono">` +
+      `<input id="swal-role" class="swal2-input" placeholder="Rol">`,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'Guardar',
+    cancelButtonText: 'Cancelar',
+    preConfirm: async () => {
+      const name = (document.getElementById('swal-name') as HTMLInputElement).value;
+      const email = (document.getElementById('swal-email') as HTMLInputElement).value;
+      const password = (document.getElementById('swal-password') as HTMLInputElement).value;
+      const direccion = (document.getElementById('swal-direccion') as HTMLInputElement).value;
+      const telefono = (document.getElementById('swal-telefono') as HTMLInputElement).value;
+      const role = (document.getElementById('swal-role') as HTMLInputElement).value;
+
+      try {
+        await axios.post('/users', {
+          name,
+          email,
+          password,
+          direccion,
+          telefono,
+          role,
+        });
+
+        const response = await axios.get('/users');
+        users.value = response.data;
+
+        Swal.fire('Creado', 'El usuario fue creado correctamente.', 'success');
+      } catch (error: any) {
+        const msg = error?.response?.data?.message ?? 'Error al crear el usuario.';
+        Swal.fire('Error', msg, 'error');
+      }
+    },
+  });
+};
+
+
 </script>
 
 <template>
@@ -114,13 +162,14 @@ const openEditModal = (user: User) => {
   <AppLayout>
     <div class="p-8 space-y-6">
       <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-semibold text-white">Usuarios</h1>
+        <h1 class="text-3xl font-semibold text-white text-center w-full">PANEL DE ADMINISTRACIÓN</h1>
         <button
-          @click="router.visit('/users/create')"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow"
-        >
-          + Crear Usuario
-        </button>
+        @click="openCreateModal"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow"
+      >
+        + Crear Usuario
+      </button>
+
       </div>
 
       <!-- Componente de búsqueda -->
