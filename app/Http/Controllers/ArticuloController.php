@@ -17,6 +17,14 @@ class ArticuloController extends Controller
         return response()->json($articulos);
     }
 
+    public function vista()
+{
+    $articulos = Articulo::with('imagenes')->get();
+    return Inertia::render('Articulos/Index', [
+        'articulos' => $articulos
+    ]);
+}
+
     public function create()
     {
         return Inertia::render('Articulos/Create'); 

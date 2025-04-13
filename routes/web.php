@@ -71,6 +71,7 @@ Route::get('/admin/items', function () {
 
 
 
+
 // Archivos de configuración y autenticación
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
