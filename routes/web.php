@@ -13,20 +13,25 @@ Route::get('/', function () {
 // Ruta del dashboard del usuario
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified' ,'role:Admin'])->name('dashboard');
+})->middleware(['auth', 'verified', 'role:Admin'])->name('dashboard');
 
 // Ruta del dashboard de administrador
 Route::get('/admin/dashboard', function () {
     return Inertia::render('AdminDashboard');
 })->middleware(['auth', 'verified', 'role:Admin'])->name('admin.dashboard');
 
-// // Ruta principal de la aplicación
-// Route::get('/home', function () {
-//     return Inertia::render('home');
-// })->middleware(['auth', 'verified'])->name('home');
+// ADMIN ELIMINAR E EDITAR USUARIOS
+// Mostrar listado de usuarios
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
 
-// Ruta para los usuarios
-Route::get('/users', [UserController::class, 'index']);
+// Ruta para editar un usuario
+Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+
+// Ruta para actualizar un usuario
+Route::put('/users/{user}', [UserController::class, 'update']);
+
+// Ruta para eliminar un usuario
+Route::delete('/users/{user}', [UserController::class, 'destroy']);
 
 // Rutas para los artículos
 Route::post('/articulos/{articulo}/images', [ArticuloController::class, 'uploadImages']);
@@ -44,10 +49,6 @@ Route::get('/api/articulos', [ArticuloController::class, 'index'])->name('api.ar
 Route::get('/articulos/create', function () {
     return Inertia::render('AddArticles');
 })->middleware(['auth', 'verified'])->name('articulos.create');
-
-Route::get('/addArticles', function () {
-    return Inertia::render('addArticles');  
-})->middleware(['auth', 'verified'])->name('addArticles');
 
 // Ruta para almacenar artículos
 Route::post('/articulos', [ArticuloController::class, 'store'])->name('articulos.store');

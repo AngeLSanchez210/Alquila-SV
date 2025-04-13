@@ -2,12 +2,16 @@
 import { ref, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import AppLayout from '@/Layouts/AppLayout.vue';
 
 interface User {
   id: number;
   name: string;
   email: string;
+  direccion?: string;
+  telefono?: string;
+  role: string;
 }
 
 const users = ref<User[]>([]);
@@ -18,10 +22,77 @@ onMounted(async () => {
 });
 
 const deleteUser = async (id: number) => {
-  if (confirm('¿Deseas eliminar este usuario?')) {
-    await axios.delete(`/users/${id}`);
-    users.value = users.value.filter(user => user.id !== id);
+  const result = await Swal.fire({
+    title: '¿Estás seguro?',
+    text: 'Esta acción eliminará al usuario de forma permanente.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#e3342f',
+    cancelButtonColor: '#6c757d',
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await axios.delete(`/users/${id}`);
+      users.value = users.value.filter(user => user.id !== id);
+
+      await Swal.fire({
+        title: '¡Eliminado!',
+        text: 'El usuario fue eliminado correctamente.',
+        icon: 'success',
+        confirmButtonColor: '#3085d6',
+      });
+    } catch (error) {
+      Swal.fire({
+        title: 'Error',
+        text: 'No se pudo eliminar el usuario.',
+        icon: 'error',
+      });
+    }
   }
+};
+
+const openEditModal = (user: User) => {
+  Swal.fire({
+    title: 'Editar Usuario',
+    html:
+      `<input id="swal-name" class="swal2-input" placeholder="Nombre" value="${user.name}">` +
+      `<input id="swal-email" class="swal2-input" placeholder="Correo" value="${user.email}">` +
+      `<input id="swal-direccion" class="swal2-input" placeholder="Dirección" value="${user.direccion || ''}">` +
+      `<input id="swal-telefono" class="swal2-input" placeholder="Teléfono" value="${user.telefono || ''}">` +
+      `<input id="swal-role" class="swal2-input" placeholder="Rol" value="${user.role}">`,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'Guardar',
+    cancelButtonText: 'Cancelar',
+    preConfirm: async () => {
+      const name = (document.getElementById('swal-name') as HTMLInputElement).value;
+      const email = (document.getElementById('swal-email') as HTMLInputElement).value;
+      const direccion = (document.getElementById('swal-direccion') as HTMLInputElement).value;
+      const telefono = (document.getElementById('swal-telefono') as HTMLInputElement).value;
+      const role = (document.getElementById('swal-role') as HTMLInputElement).value;
+
+      try {
+        await axios.put(`/users/${user.id}`, {
+          name,
+          email,
+          direccion,
+          telefono,
+          role,
+        });
+
+        const response = await axios.get('/users');
+        users.value = response.data;
+
+        Swal.fire('Actualizado', 'El usuario fue editado correctamente.', 'success');
+      } catch (error: any) {
+        const msg = error?.response?.data?.message ?? 'Error al actualizar el usuario.';
+        Swal.fire('Error', msg, 'error');
+      }
+    },
+  });
 };
 </script>
 
@@ -61,7 +132,7 @@ const deleteUser = async (id: number) => {
               <td class="px-6 py-4">{{ user.email }}</td>
               <td class="px-6 py-4 space-x-3">
                 <button
-                  @click="router.visit(`/users/${user.id}/edit`)"
+                  @click="openEditModal(user)"
                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
                 >
                   Editar
@@ -85,4 +156,3 @@ const deleteUser = async (id: number) => {
     </div>
   </AppLayout>
 </template>
-
