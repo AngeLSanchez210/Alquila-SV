@@ -8,50 +8,50 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
-
 class ArticuloController extends Controller
 {
     public function index()
     {
-        $articulos = Articulo::with('imagenes')->get();
+        
+        $articulos = Articulo::with('imagenes', 'usuario')->get();
         return response()->json($articulos);
     }
 
     public function vista()
-{
-    $articulos = Articulo::with('imagenes')->get();
-    return Inertia::render('Articulos/Index', [
-        'articulos' => $articulos
-    ]);
-}
+    {
+       
+        $articulos = Articulo::with('imagenes', 'usuario')->get();
+        return Inertia::render('Articulos/Index', [
+            'articulos' => $articulos
+        ]);
+    }
 
     public function create()
     {
         return Inertia::render('Articulos/Create'); 
     }
 
-
     public function store(Request $request)
     {
-        
+       
         $data = $request->validate([
             'nombre' => 'required|string',
             'descripcion' => 'required|string',
             'precio' => 'required|numeric',
             'estado' => 'required|in:disponible,alquilado',
-            'imagenes.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validar múltiples imágenes
+            'imagenes.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
         ]);
-    
+
        
         $articulo = Articulo::create([
             'nombre' => $data['nombre'],
             'descripcion' => $data['descripcion'],
             'precio' => $data['precio'],
             'estado' => $data['estado'],
-            'usuario_id' => auth()->id(),
+            'usuario_id' => auth()->id(), 
         ]);
-    
-        
+
+      
         if ($request->hasFile('imagenes')) {
             foreach ($request->file('imagenes') as $imagen) {
                 $imagePath = $imagen->store('articulos', 'public');
@@ -61,18 +61,28 @@ class ArticuloController extends Controller
                 ]);
             }
         }
-    
+
         return redirect()->route('articulos')->with('success', 'Artículo creado con éxito.');
     }
 
-
     public function show(Articulo $articulo)
     {
-        return $articulo->load('categorias', 'usuario', 'imagenes');
+       
+        $articulo->load('categorias', 'usuario', 'imagenes');
+        
+      
+        $nombreUsuario = $articulo->usuario->name; 
+        
+       
+        return response()->json([
+            'articulo' => $articulo,
+            'nombre_usuario' => $nombreUsuario, 
+        ]);
     }
 
     public function update(Request $request, Articulo $articulo)
     {
+       
         $data = $request->validate([
             'nombre' => 'string',
             'descripcion' => 'string',
@@ -80,7 +90,9 @@ class ArticuloController extends Controller
             'estado' => 'in:disponible,alquilado',
         ]);
 
+       
         $articulo->update($data);
+        
         return response()->json([
             'message' => 'Artículo actualizado correctamente',
             'articulo' => $articulo,
@@ -89,7 +101,7 @@ class ArticuloController extends Controller
 
     public function destroy(Articulo $articulo)
     {
-       
+        
         foreach ($articulo->imagenes as $imagen) {
             Storage::delete('public/' . $imagen->link);
             $imagen->delete();
@@ -101,3 +113,4 @@ class ArticuloController extends Controller
         return response()->json(['message' => 'Artículo eliminado correctamente']);
     }
 }
+

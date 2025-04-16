@@ -13,8 +13,9 @@ class Articulo extends Model
 
     public function usuario()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'usuario_id');
     }
+
 
     public function categorias()
     {
@@ -36,7 +37,7 @@ class Articulo extends Model
         return $this->hasMany(Suscripcion::class);
     }
 
-    // 🔹 Relación con las imágenes del artículo
+   
     public function imagenes()
     {
         return $this->hasMany(ImgArticulo::class, 'articulo_id');
