@@ -29,10 +29,12 @@ export interface User {
     id: number;
     name: string;
     email: string;
-    avatar?: string;
+    direccion?: string;
+    telefono?: string;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    avatar?: string;
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;

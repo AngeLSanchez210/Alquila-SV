@@ -37,6 +37,9 @@ Route::put('/users/{user}', [UserController::class, 'update']);
 // Ruta para eliminar un usuario
 Route::delete('/users/{user}', [UserController::class, 'destroy']);
 
+// Ruta para mostrar los datos de un usuario específico
+Route::get('/user/{user}', [UserController::class, 'show'])->name('user.show');
+
 // Rutas para los artículos
 Route::post('/articulos/{articulo}/images', [ArticuloController::class, 'uploadImages']);
 Route::post('/articulos', [ArticuloController::class, 'store']);

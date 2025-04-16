@@ -39,6 +39,18 @@ class UserController extends Controller
         ]);
     }
 
+    public function show(Request $request, User $user)
+    {
+        // Verifica si hay un usuario autenticado
+        if (!$request->user() || $request->user()->id !== $user->id) {
+            return redirect()->route('home');
+        }
+
+        return Inertia::render('User/infoUser', [
+            'user' => $user,
+        ]);
+    }
+
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
