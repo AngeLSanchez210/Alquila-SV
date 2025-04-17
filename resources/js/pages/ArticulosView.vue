@@ -106,8 +106,63 @@ const agregarAFavoritos = async () => {
   <!-- Sección principal -->
   <section class="flex flex-col lg:flex-row gap-6 bg-gray-100 p-16 text-gray-900">
     <!-- Filtros -->
-    <div class="w-full lg:w-80 space-y-6 bg-white p-6 rounded-lg shadow-sm max-h-fit">
-      <!-- Aquí puedes añadir tus filtros -->
+    <div class="w-full lg:w-80  space-y-6 bg-white p-6 rounded-lg shadow-sm max-h-fit">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900">Filtros</h3>
+      
+      <!-- Filtro de precio -->
+      <div class="space-y-4">
+        <h4 class="text-sm font-medium">Rango de precios</h4>
+        <div class="flex items-center gap-3">
+          <input
+            type="number"
+            v-model="priceInput"
+            min="0"
+            max="1000"
+            step="10"
+            class="w-24 px-3 py-2 border rounded-md text-sm"
+            @input="updatePrice(priceInput)"
+          />
+          <span class="text-sm text-gray-500">máx.</span>
+        </div>
+        <div class="relative pt-2">
+          <input
+            type="range"
+            v-model="priceRange"
+            min="0"
+            max="1000"
+            step="10"
+            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            @input="updatePrice(priceRange)"
+          />
+          <div class="flex justify-between text-sm text-gray-500 mt-2">
+            <span>$0</span>
+            <span>$1000</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtro de categorias -->
+      <div class="border-t pt-6">
+           <h4 class="text-sm font-medium mb-3">Categorías</h4>
+           <div class="space-y-2">
+             <label class="flex items-center gap-2">
+               <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
+               <span class="text-sm">Camisetas</span>
+             </label>
+             <label class="flex items-center gap-2">
+               <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
+               <span class="text-sm">Pantalones</span>
+             </label>
+             <label class="flex items-center gap-2">
+               <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
+               <span class="text-sm">Sudaderas</span>
+             </label>
+             <label class="flex items-center gap-2">
+               <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
+               <span class="text-sm">Accesorios</span>
+             </label>
+            </div>
+          </div>
     </div>
 
     <!-- Productos -->
