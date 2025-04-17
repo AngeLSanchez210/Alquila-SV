@@ -3,6 +3,7 @@ import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { usePage } from '@inertiajs/vue3'
 
 // Swiper.js
 import { Swiper, SwiperSlide } from "swiper/vue";
@@ -47,6 +48,16 @@ const cerrarModal = () => {
 onMounted(() => {
   fetchArticulos();
 });
+
+
+
+
+// const user = usePage().props.auth.user
+
+// console.log('🆔 ID:', user?.id)
+// console.log('📛 Nombre:', user?.name)
+// console.log('📧 Email:', user?.email)
+// console.log('🎭 Rol:', user?.role)
 </script>
 
 <template>
