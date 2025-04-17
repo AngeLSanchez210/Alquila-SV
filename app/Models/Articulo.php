@@ -29,9 +29,8 @@ class Articulo extends Model
 
     public function puntuaciones()
     {
-        return $this->hasMany(Puntuacion::class);
+        return $this->hasMany(Puntuacion::class, 'articulo_id');
     }
-
     public function suscripciones()
     {
         return $this->hasMany(Suscripcion::class);

@@ -5,6 +5,8 @@ use Inertia\Inertia;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ArticuloController;
 use App\Http\Controllers\FavoritoController;
+use App\Http\Controllers\PuntuacionController;
+use App\Http\Middleware\Denegade;
 
 
 // Ruta de inicio
@@ -76,9 +78,20 @@ Route::get('/admin/items', function () {
 
 
 
-Route::post('/api/favoritos', [FavoritoController::class, 'store']);
-Route::get('/favoritos', [FavoritoController::class, 'index']);
-Route::delete('/favoritos/{favorito}', [FavoritoController::class, 'destroy']);
+
+
+
+Route::middleware([Denegade::class, 'verified'])->group(function () {
+    
+    Route::get('/api/favoritos', [FavoritoController::class, 'index'])->name('api.favoritos');
+    Route::post('/api/favoritos', [FavoritoController::class, 'store'])->name('favoritos.store');
+    Route::delete('/favoritos/{favorito}', [FavoritoController::class, 'destroy'])->name('favoritos.destroy');
+});
+
+
+
+
+Route::post('/puntuaciones', [PuntuacionController::class, 'store'])->name('puntuaciones.store');
 
 
 
