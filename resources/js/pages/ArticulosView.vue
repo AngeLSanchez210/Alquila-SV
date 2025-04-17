@@ -3,7 +3,7 @@ import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { usePage } from '@inertiajs/vue3'
+import { usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 
 // Swiper.js
@@ -18,6 +18,9 @@ const priceRange = ref(100);
 
 const mostrarModal = ref(false);
 const articuloSeleccionado = ref(null);
+
+const puntuacion = ref(0);
+const comentario = ref('');
 
 const updatePrice = (value) => {
   const maxPrice = 1000;
@@ -50,7 +53,7 @@ onMounted(() => {
   fetchArticulos();
 });
 
-axios.defaults.withCredentials = true; 
+axios.defaults.withCredentials = true;
 
 const user = usePage().props.auth.user;
 
@@ -79,7 +82,7 @@ const agregarAFavoritos = async () => {
       Swal.fire({
         icon: 'success',
         title: '¡Éxito!',
-        text: response.data.message, 
+        text: response.data.message,
       });
     }
   } catch (error) {
@@ -92,12 +95,37 @@ const agregarAFavoritos = async () => {
   }
 };
 
+const agregarPuntuacion = async () => {
+  if (!user || !articuloSeleccionado.value || !puntuacion.value) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Debes iniciar sesión y proporcionar una puntuación',
+      text: 'Inicia sesión para agregar una puntuación al artículo.',
+    });
+    return;
+  }
 
+  try {
+    await axios.post('/puntuaciones', {
+      articulo_id: articuloSeleccionado.value.id,
+      puntuacion: puntuacion.value,
+      comentario: comentario.value || "",
+    });
 
-// console.log('🆔 ID:', user?.id)
-//  console.log('📛 Nombre:', user?.name)
-// console.log('📧 Email:', user?.email)
-// console.log('🎭 Rol:', user?.role)
+    Swal.fire({
+      icon: 'success',
+      title: '¡Puntuación agregada!',
+      text: 'Tu puntuación se ha registrado correctamente.',
+    });
+  } catch (error) {
+    console.error("Error al agregar puntuación:", error);
+    Swal.fire({
+      icon: 'error',
+      title: '¡Error!',
+      text: 'Hubo un problema al guardar la puntuación. Intenta nuevamente.',
+    });
+  }
+};
 </script>
 
 <template>
@@ -106,10 +134,10 @@ const agregarAFavoritos = async () => {
   <!-- Sección principal -->
   <section class="flex flex-col lg:flex-row gap-6 bg-gray-100 p-16 text-gray-900">
     <!-- Filtros -->
-    <div class="w-full lg:w-80  space-y-6 bg-white p-6 rounded-lg shadow-sm max-h-fit">
+    <div class="w-full lg:w-80 space-y-6 bg-white p-6 rounded-lg shadow-sm max-h-fit">
       <h3 class="text-lg font-semibold mb-4 text-gray-900">Filtros</h3>
-      
-      <!-- Filtro de precio -->
+
+      <!-- Rango de precios -->
       <div class="space-y-4">
         <h4 class="text-sm font-medium">Rango de precios</h4>
         <div class="flex items-center gap-3">
@@ -141,38 +169,24 @@ const agregarAFavoritos = async () => {
         </div>
       </div>
 
-      <!-- Filtro de categorias -->
+      <!-- Categorías -->
       <div class="border-t pt-6">
-           <h4 class="text-sm font-medium mb-3">Categorías</h4>
-           <div class="space-y-2">
-             <label class="flex items-center gap-2">
-               <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
-               <span class="text-sm">Camisetas</span>
-             </label>
-             <label class="flex items-center gap-2">
-               <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
-               <span class="text-sm">Pantalones</span>
-             </label>
-             <label class="flex items-center gap-2">
-               <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
-               <span class="text-sm">Sudaderas</span>
-             </label>
-             <label class="flex items-center gap-2">
-               <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
-               <span class="text-sm">Accesorios</span>
-             </label>
-            </div>
-          </div>
+        <h4 class="text-sm font-medium mb-3">Categorías</h4>
+        <div class="space-y-2">
+          <label v-for="(categoria, index) in ['Camisetas', 'Pantalones', 'Sudaderas', 'Accesorios']" :key="index" class="flex items-center gap-2">
+            <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
+            <span class="text-sm">{{ categoria }}</span>
+          </label>
+        </div>
+      </div>
     </div>
 
     <!-- Productos -->
     <div class="flex-1 bg-white">
       <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
         <h2 class="text-2xl font-bold tracking-tight text-gray-900">Mostrando artículos</h2>
-
         <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
           <div v-for="articulo in articulos" :key="articulo.id" class="group relative">
-            <!-- Carrusel -->
             <swiper :modules="[Navigation, Pagination]" navigation pagination class="rounded-md shadow-lg">
               <swiper-slide v-for="imagen in articulo.imagenes" :key="imagen.id">
                 <img
@@ -182,8 +196,6 @@ const agregarAFavoritos = async () => {
                 />
               </swiper-slide>
             </swiper>
-
-            <!-- Info -->
             <div class="mt-4 flex justify-between">
               <div>
                 <h3 class="text-sm text-gray-700">
@@ -235,33 +247,59 @@ const agregarAFavoritos = async () => {
             </swiper>
           </div>
 
-          <!-- Info completa -->
+          <!-- Info -->
           <div class="space-y-6">
             <p class="text-2xl font-semibold text-gray-900">${{ articuloSeleccionado.precio }}</p>
             <p class="text-gray-700">{{ articuloSeleccionado.descripcion }}</p>
-
             <div class="border-t border-gray-200 pt-4 space-y-2">
               <h3 class="text-lg font-medium text-gray-900">Detalles del producto</h3>
-              <p class=" text-black font-medium"><span class=" text-black font-medium">Estado:</span> {{ articuloSeleccionado.estado }}</p>
-              <p class="text-black font-medium">
-              <span class="text-black font-medium">Publicado por:</span> {{ articuloSeleccionado.usuario?.name || 'Desconocido' }}</p>
-              <p class=" text-black font-medium"><span class="text-black font-medium">Fecha de publicación:</span> {{ new Date(articuloSeleccionado.created_at).toLocaleString() }}</p>
+              <p class="text-black font-medium">Estado: {{ articuloSeleccionado.estado }}</p>
+              <p class="text-black font-medium">Publicado por: {{ articuloSeleccionado.usuario?.name || 'Desconocido' }}</p>
+              <p class="text-black font-medium">Fecha de publicación: {{ new Date(articuloSeleccionado.created_at).toLocaleString() }}</p>
             </div>
 
-            <div class="mt-6">
-              <button class="w-full bg-indigo-600 py-3 px-8 rounded-md font-medium text-white hover:bg-indigo-700">
-                Contactar vendedor
-              </button>
-            </div>
-            <div class="mt-6">
-              <button
-                      @click.stop.prevent="agregarAFavoritos"
-                      class="w-full bg-yellow-400 py-3 px-8 rounded-md font-medium text-black hover:bg-yellow-500 mb-4"
-                    >
-                      Agregar a favoritos ❤️
-              </button>
+            <!-- Contactar -->
+            <button class="w-full bg-indigo-600 py-3 px-8 rounded-md font-medium text-white hover:bg-indigo-700">Contactar vendedor</button>
 
+            <!-- Favoritos -->
+            <button
+              @click.stop.prevent="agregarAFavoritos"
+              class="w-full bg-yellow-400 py-3 px-8 rounded-md font-medium text-black hover:bg-yellow-500 mb-4"
+            >
+              Agregar a favoritos ❤️
+            </button>
+
+            <!-- Puntuación -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Tu puntuación:</label>
+              <div class="flex items-center space-x-1 mt-2">
+                <template v-for="n in 5" :key="n">
+                  <svg
+                    @click="puntuacion = n"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 cursor-pointer transition duration-200"
+                    :class="puntuacion >= n ? 'text-yellow-400' : 'text-gray-300'"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.96a1 1 0 00.95.69h4.17c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.96c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.176 0l-3.38 2.455c-.784.57-1.838-.197-1.539-1.118l1.287-3.96a1 1 0 00-.364-1.118L2.055 9.387c-.783-.57-.38-1.81.588-1.81h4.17a1 1 0 00.951-.69l1.285-3.96z" />
+                  </svg>
+                </template>
+              </div>
             </div>
+
+            <!-- Comentario -->
+            <div>
+              <label for="comentario" class="block text-sm font-medium text-gray-700">Comentario (opcional):</label>
+              <textarea  v-model="comentario" id="comentario" rows="4" class="w-full px-3 py-2 border rounded-md text-sm mt-2 text-gray-700 "></textarea>
+            </div>
+
+            <button
+              @click.stop.prevent="agregarPuntuacion"
+              class="mt-4 w-full bg-indigo-600 py-3 px-8 rounded-md font-medium text-white hover:bg-indigo-700"
+            >
+              Agregar Puntuación
+            </button>
           </div>
         </div>
       </div>
@@ -279,7 +317,6 @@ const agregarAFavoritos = async () => {
   overflow: hidden;
 }
 .detalles-producto {
-  color: #000000; 
+  color: #000000;
 }
-
 </style>

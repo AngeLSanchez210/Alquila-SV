@@ -90,8 +90,8 @@ Route::middleware([Denegade::class, 'verified'])->group(function () {
 
 
 
-
 Route::post('/puntuaciones', [PuntuacionController::class, 'store'])->name('puntuaciones.store');
+Route::get('/puntuaciones/{articuloId}/{userId}', [PuntuacionController::class, 'verificarPuntuacion']);
 
 
 
