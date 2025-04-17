@@ -118,14 +118,23 @@ const agregarPuntuacion = async () => {
       text: 'Tu puntuación se ha registrado correctamente.',
     });
   } catch (error) {
-    console.error("Error al agregar puntuación:", error);
-    Swal.fire({
-      icon: 'error',
-      title: '¡Error!',
-      text: 'Hubo un problema al guardar la puntuación. Intenta nuevamente.',
-    });
+    if (error.response && error.response.status === 409) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Ya puntuaste este artículo',
+        text: 'Solo puedes puntuar una vez por artículo.',
+      });
+    } else {
+      console.error("Error al agregar puntuación:", error);
+      Swal.fire({
+        icon: 'error',
+        title: '¡Error!',
+        text: 'Hubo un problema al guardar la puntuación. Intenta nuevamente.',
+      });
+    }
   }
 };
+
 </script>
 
 <template>

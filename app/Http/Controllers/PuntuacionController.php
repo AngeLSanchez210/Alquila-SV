@@ -17,37 +17,35 @@ class PuntuacionController extends Controller
     
     public function store(Request $request)
     {
-       
         $request->validate([
-            'articulo_id' => 'required|exists:articulos,id',  
-            'puntuacion' => 'required|integer|min:1|max:5',   
-            'comentario' => 'nullable|string',  
+            'articulo_id' => 'required|exists:articulos,id',
+            'puntuacion' => 'required|integer|min:1|max:5',
+            'comentario' => 'nullable|string',
         ]);
-
-        
+    
         $user = $request->user();
-
-        
+    
+        // Verificar si ya existe una puntuación de este usuario para este artículo
         $existe = Puntuacion::where('usuario_id', $user->id)
-                            ->where('articulo_id', $request->articulo_id)
-                            ->first();
-
-       
+            ->where('articulo_id', $request->articulo_id)
+            ->exists();
+    
         if ($existe) {
-            return response()->json(['message' => 'Ya has puntuado este artículo.'], 409);  
+            return response()->json([
+                'message' => 'Ya has puntuado este artículo.'
+            ], 409);
         }
-
-       
+    
         $puntuacion = new Puntuacion();
-        $puntuacion->usuario_id = $user->id;  
-        $puntuacion->articulo_id = $request->articulo_id;  
-        $puntuacion->puntuacion = $request->puntuacion;  
-        $puntuacion->comentario = $request->comentario;  
-        $puntuacion->save();  
-
-       
-        return response()->json($puntuacion, 201);  
+        $puntuacion->usuario_id = $user->id;
+        $puntuacion->articulo_id = $request->articulo_id;
+        $puntuacion->puntuacion = $request->puntuacion;
+        $puntuacion->comentario = $request->comentario;
+        $puntuacion->save();
+    
+        return response()->json($puntuacion, 201);
     }
+    
 
     public function verificarPuntuacion($articuloId, $userId)
 {
