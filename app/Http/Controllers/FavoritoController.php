@@ -14,13 +14,29 @@ class FavoritoController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'usuario_id' => 'required|exists:users,id',
+        $request->validate([
             'articulo_id' => 'required|exists:articulos,id',
         ]);
 
-        return Favorito::create($data);
+        $user = $request->user();
+
+        // Verifica si ya está en favoritos
+        $existe = Favorito::where('usuario_id', $user->id)
+                          ->where('articulo_id', $request->articulo_id)
+                          ->first();
+
+        if ($existe) {
+            return response()->json(['message' => 'Ya está en favoritos'], 200);
+        }
+
+        $favorito = new Favorito();
+        $favorito->usuario_id = $user->id;
+        $favorito->articulo_id = $request->articulo_id;
+        $favorito->save();
+
+        return response()->json(['message' => 'Artículo añadido a favoritos'], 201);
     }
+
 
     public function destroy(Favorito $favorito)
     {

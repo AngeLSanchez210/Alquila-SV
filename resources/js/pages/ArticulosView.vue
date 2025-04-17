@@ -4,6 +4,7 @@ import Footer from '@/components/Footer.vue';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { usePage } from '@inertiajs/vue3'
+import Swal from 'sweetalert2';
 
 // Swiper.js
 import { Swiper, SwiperSlide } from "swiper/vue";
@@ -49,13 +50,52 @@ onMounted(() => {
   fetchArticulos();
 });
 
+axios.defaults.withCredentials = true; 
+
+const user = usePage().props.auth.user;
+
+const agregarAFavoritos = async () => {
+  if (!user || !articuloSeleccionado.value) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Debes iniciar sesión',
+      text: 'Inicia sesión para agregar el artículo a tus favoritos.',
+    });
+    return;
+  }
+
+  try {
+    const response = await axios.post('/api/favoritos', {
+      articulo_id: articuloSeleccionado.value.id
+    });
+
+    if (response.data.message === 'Ya está agregado en favoritos') {
+      Swal.fire({
+        icon: 'info',
+        title: 'Ya en favoritos',
+        text: 'Este artículo ya está en tu lista de favoritos.',
+      });
+    } else {
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: response.data.message, 
+      });
+    }
+  } catch (error) {
+    console.error("Error al agregar a favoritos:", error);
+    Swal.fire({
+      icon: 'error',
+      title: '¡Error!',
+      text: 'Hubo un problema al guardar el favorito. Intenta nuevamente.',
+    });
+  }
+};
 
 
-
-// const user = usePage().props.auth.user
 
 // console.log('🆔 ID:', user?.id)
-// console.log('📛 Nombre:', user?.name)
+//  console.log('📛 Nombre:', user?.name)
 // console.log('📧 Email:', user?.email)
 // console.log('🎭 Rol:', user?.role)
 </script>
@@ -157,6 +197,15 @@ onMounted(() => {
               <button class="w-full bg-indigo-600 py-3 px-8 rounded-md font-medium text-white hover:bg-indigo-700">
                 Contactar vendedor
               </button>
+            </div>
+            <div class="mt-6">
+              <button
+                      @click.stop.prevent="agregarAFavoritos"
+                      class="w-full bg-yellow-400 py-3 px-8 rounded-md font-medium text-black hover:bg-yellow-500 mb-4"
+                    >
+                      Agregar a favoritos ❤️
+              </button>
+
             </div>
           </div>
         </div>

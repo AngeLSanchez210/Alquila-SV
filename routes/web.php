@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ArticuloController;
+use App\Http\Controllers\FavoritoController;
+
 
 // Ruta de inicio
 Route::get('/', function () {
@@ -71,6 +73,12 @@ Route::get('/admin/items', function () {
     return Inertia::render('admin/adminArticles'); 
 })->name('admin.items');
 
+
+
+
+Route::post('/api/favoritos', [FavoritoController::class, 'store']);
+Route::get('/favoritos', [FavoritoController::class, 'index']);
+Route::delete('/favoritos/{favorito}', [FavoritoController::class, 'destroy']);
 
 
 
