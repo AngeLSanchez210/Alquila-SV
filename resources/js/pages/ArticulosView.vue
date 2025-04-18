@@ -195,36 +195,45 @@ const agregarPuntuacion = async () => {
       <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
         <h2 class="text-2xl font-bold tracking-tight text-gray-900">Mostrando artículos</h2>
         <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-          <div v-for="articulo in articulos" :key="articulo.id" class="group relative">
-            <swiper :modules="[Navigation, Pagination]" navigation pagination class="rounded-md shadow-lg">
-              <swiper-slide v-for="imagen in articulo.imagenes" :key="imagen.id">
-                <img
-                  :src="imagen.link ? `/storage/${imagen.link}` : 'https://via.placeholder.com/150'"
-                  :alt="articulo.nombre"
-                  class="w-full h-60 object-cover rounded-md"
-                />
-              </swiper-slide>
-            </swiper>
-            <div class="mt-4 flex justify-between">
-              <div>
-                <h3 class="text-sm text-gray-700">
-                  <a href="#" @click.prevent>
-                    <span aria-hidden="true" class="absolute inset-0"></span>
-                    {{ articulo.nombre }}
-                  </a>
-                </h3>
-                <p class="mt-1 text-sm text-gray-500">{{ articulo.descripcion }}</p>
-                <button
-                  @click.stop.prevent="abrirDetalles(articulo)"
-                  class="mt-2 px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 relative z-10"
-                >
-                  Ver más
-                </button>
-              </div>
-              <p class="text-sm font-medium text-gray-900">${{ articulo.precio }}</p>
-            </div>
-          </div>
-        </div>
+          <div
+  v-for="articulo in articulos"
+  :key="articulo.id"
+  class="bg-white rounded-xl shadow-md overflow-hidden flex flex-col transition-transform transform hover:-translate-y-1 hover:shadow-lg"
+>
+  <swiper
+    :modules="[Navigation, Pagination]"
+    navigation
+    pagination
+    class="w-full h-60"
+  >
+    <swiper-slide v-for="imagen in articulo.imagenes" :key="imagen.id">
+      <img
+        :src="imagen.link ? `/storage/${imagen.link}` : 'https://via.placeholder.com/300x200'"
+        :alt="articulo.nombre"
+        class="w-full h-60 object-cover"
+      />
+    </swiper-slide>
+  </swiper>
+
+  <div class="p-4 flex flex-col justify-between flex-grow">
+    <div class="mb-3">
+      <h3 class="text-lg font-semibold text-gray-900 truncate">{{ articulo.nombre }}</h3>
+      <p class="text-sm text-gray-600 mt-1 line-clamp-2">{{ articulo.descripcion }}</p>
+    </div>
+    
+    <div class="mt-auto">
+      <p class="text-indigo-600 font-bold text-lg mb-3">${{ articulo.precio }}</p>
+      <button
+        @click.stop.prevent="abrirDetalles(articulo)"
+        class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition"
+      >
+        Ver más
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
       </div>
     </div>
   </section>
