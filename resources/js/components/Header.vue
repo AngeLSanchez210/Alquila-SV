@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 
 const isMobileMenuOpen = ref(false);
+const { props } = usePage(); // Accede a las propiedades de la página, incluyendo el usuario autenticado
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value; // Alterna el estado del menú móvil
@@ -19,6 +21,11 @@ const toggleMenu = () => {
 const closeProfileMenu = () => {
   const menu = document.getElementById('profile-menu');
   menu?.classList.add('hidden'); // Cierra el menú de perfil
+};
+
+const redirectToProfile = () => {
+  const userId = props.auth.user.id; // Obtén el ID del usuario autenticado
+  window.location.href = `/user/${userId}`; // Redirige a la ruta del perfil del usuario
 };
 
 onMounted(() => {
@@ -148,7 +155,7 @@ const menuItems = [
                     tabIndex="-1"
                     role="menuitem"
                     class="text-gray-600 hover:text-gray-900 flex w-full cursor-pointer select-none items-center gap-2 rounded-md px-3 pt-[9px] pb-2 text-start leading-tight outline-none transition-all hover:bg-blue-gray-50 hover:bg-opacity-80 hover:text-blue-gray-900 focus:bg-blue-gray-50 focus:bg-opacity-80 focus:text-blue-gray-900 active:bg-blue-gray-50 active:bg-opacity-80 active:text-blue-gray-900"
-                    @click="closeProfileMenu"
+                    @click="closeProfileMenu(); redirectToProfile()"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -173,7 +180,7 @@ const menuItems = [
                     tabIndex="-1"
                     role="menuitem"
                     class="text-gray-600 hover:text-gray-900 flex w-full cursor-pointer select-none items-center gap-2 rounded-md px-3 pt-[9px] pb-2 text-start leading-tight outline-none transition-all hover:bg-blue-gray-50 hover:bg-opacity-80 hover:text-blue-gray-900 focus:bg-blue-gray-50 focus:bg-opacity-80 focus:text-blue-gray-900 active:bg-blue-gray-50 active:bg-opacity-80 active:text-blue-gray-900"
-                    @click="closeProfileMenu"
+                    @click="closeProfileMenu(); redirectToProfile()"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -200,7 +207,7 @@ const menuItems = [
                     tabIndex="-1"
                     role="menuitem"
                     class="text-gray-600 hover:text-gray-900 flex w-full cursor-pointer select-none items-center gap-2 rounded-md px-3 pt-[9px] pb-2 text-start leading-tight outline-none transition-all hover:bg-blue-gray-50 hover:bg-opacity-80 hover:text-blue-gray-900 focus:bg-blue-gray-50 focus:bg-opacity-80 focus:text-blue-gray-900 active:bg-blue-gray-50 active:bg-opacity-80 active:text-blue-gray-900"
-                    @click="closeProfileMenu"
+                    @click="$inertia.post(route('logout')); closeProfileMenu()"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
