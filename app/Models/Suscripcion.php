@@ -20,4 +20,8 @@ class Suscripcion extends Model
     {
         return $this->belongsTo(Articulo::class);
     }
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
+    }
 }
