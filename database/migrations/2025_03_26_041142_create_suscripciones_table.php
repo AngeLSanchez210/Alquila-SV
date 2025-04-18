@@ -12,16 +12,17 @@ return new class extends Migration
     public function up()
 {
     Schema::create('suscripciones', function (Blueprint $table) {
-        $table->id(); 
+        $table->id();
         $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
-        $table->foreignId('articulo_id')->constrained('articulos')->onDelete('cascade'); 
-        $table->timestamp('fecha_inicio'); 
-        $table->timestamp('fecha_fin')->nullable(); 
-        $table->enum('estado', ['activa', 'cancelada']); 
-        $table->enum('plan', ['gratis', 'basico', 'premium']); 
-        $table->timestamps(); 
+        $table->foreignId('articulo_id')->constrained('articulos')->onDelete('cascade');
+        $table->foreignId('plan_id')->constrained('planes'); // Relación con la tabla de planes
+        $table->timestamp('fecha_inicio');
+        $table->timestamp('fecha_fin')->nullable();
+        $table->enum('estado', ['activa', 'cancelada']);
+        $table->timestamps();
     });
 }
+
 
     
 

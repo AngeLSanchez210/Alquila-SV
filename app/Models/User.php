@@ -62,7 +62,7 @@ class User extends Authenticatable
 
     public function puntuaciones()
     {
-        return $this->hasMany(Puntuacion::class);
+        return $this->hasMany(Puntuacion::class, 'usuario_id');
     }
 
     public function suscripciones()
