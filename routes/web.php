@@ -88,7 +88,13 @@ Route::middleware([Denegade::class, 'verified'])->group(function () {
     Route::delete('/favoritos/{favorito}', [FavoritoController::class, 'destroy'])->name('favoritos.destroy');
 });
 
-
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api/user/articulos', [ArticuloController::class, 'getUserArticulos']);
+    Route::put('/api/articulos/{articulo}', [ArticuloController::class, 'update']);
+    Route::delete('/api/articulos/{articulo}', [ArticuloController::class, 'destroy']);
+    Route::delete('/api/articulos/imagenes/{imagen}', [ArticuloController::class, 'eliminarImagen']);
+    Route::post('/api/articulos/{articulo}/imagenes', [ArticuloController::class, 'subirImagenes']);
+});
 
 Route::post('/puntuaciones', [PuntuacionController::class, 'store'])->name('puntuaciones.store');
 Route::get('/puntuaciones/{articuloId}/{userId}', [PuntuacionController::class, 'verificarPuntuacion']);

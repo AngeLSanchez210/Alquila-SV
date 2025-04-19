@@ -112,5 +112,38 @@ class ArticuloController extends Controller
         
         return response()->json(['message' => 'Artículo eliminado correctamente']);
     }
+
+    public function getUserArticulos()
+    {
+        $articulos = Articulo::where('usuario_id', auth()->id())->with('imagenes')->get();
+        return response()->json($articulos);
+    }
+
+    public function eliminarImagen(ImgArticulo $imagen)
+    {
+        if ($imagen->articulo->imagenes()->count() <= 1) {
+            return response()->json(['error' => 'No puedes eliminar todas las imágenes.'], 400);
+        }
+
+        Storage::delete('public/' . $imagen->link);
+        $imagen->delete();
+
+        return response()->json(['message' => 'Imagen eliminada correctamente.']);
+    }
+
+    public function subirImagenes(Request $request, Articulo $articulo)
+    {
+        $request->validate([
+            'imagenes.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $imagenes = [];
+        foreach ($request->file('imagenes') as $imagen) {
+            $path = $imagen->store('articulos', 'public');
+            $imagenes[] = $articulo->imagenes()->create(['link' => $path]);
+        }
+
+        return response()->json($imagenes);
+    }
 }
 
