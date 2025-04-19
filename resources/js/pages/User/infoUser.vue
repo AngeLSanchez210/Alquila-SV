@@ -7,8 +7,9 @@ import type { User } from '@/types';
 
 import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
+import { objectPick } from '@vueuse/core';
 
-defineProps<{ user: User }>();
+const props = defineProps<{ user: User }>();
 
 const activeSection = ref('info'); // Estado para controlar la sección activa
 
@@ -101,8 +102,74 @@ const agregarImagenes = async (event) => {
   }
 };
 
+const mostrarModalUsuario = ref(false);
+const usuarioEditado = ref({ name: '', email: '', direccion: '', telefono: '' });
+
+const abrirModalUsuario = (userActually: any) => {
+  usuarioEditado.value = { ...userActually }; // Cambiar 'user' por 'props.user'
+  mostrarModalUsuario.value = true;
+};
+
+const guardarUsuario = async () => {
+  if (!usuarioEditado.value.name.trim()) {
+    Swal.fire('Error', 'El nombre no puede estar vacío.', 'error');
+    return;
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(usuarioEditado.value.email)) {
+    Swal.fire('Error', 'El formato del correo electrónico no es válido.', 'error');
+    return;
+  }
+  try {
+    await axios.put('/users/' + props.user.id, usuarioEditado.value);
+    Swal.fire('Actualizado', 'La información del usuario fue actualizada correctamente.', 'success');
+    mostrarModalUsuario.value = false;
+    // Actualizar la información del usuario en la interfaz
+    Object.assign(props.user, usuarioEditado.value); // Cambiar 'user' por 'props.user'
+  } catch (error) {
+    console.error('Error al guardar el usuario:', error);
+    Swal.fire('Error', 'No se pudo actualizar la información del usuario.', 'error');
+  }
+};
+
+const favoritos = ref([]);
+
+const fetchFavoritos = async () => {
+  try {
+    const response = await axios.get('/api/favoritos'); // Asegúrate de que esta ruta devuelva los datos completos del artículo
+    favoritos.value = response.data.map((favorito) => ({
+      ...favorito,
+      articulo: favorito.articulo || { nombre: 'Artículo no encontrado', descripcion: '', precio: 0, imagenes: [] },
+    }));
+  } catch (error) {
+    console.error('Error al cargar los favoritos:', error);
+  }
+};
+
+const eliminarFavorito = async (favoritoId) => {
+  const result = await Swal.fire({
+    title: '¿Estás seguro?',
+    text: 'Esta acción eliminará el artículo de tus favoritos.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await axios.delete(`/favoritos/${favoritoId}`);
+      favoritos.value = favoritos.value.filter((favorito) => favorito.id !== favoritoId);
+      Swal.fire('Eliminado', 'El artículo fue eliminado de tus favoritos.', 'success');
+    } catch (error) {
+      Swal.fire('Error', 'No se pudo eliminar el artículo de tus favoritos.', 'error');
+    }
+  }
+};
+
 onMounted(() => {
   fetchArticulos();
+  fetchFavoritos();
 });
 </script>
 
@@ -164,7 +231,42 @@ onMounted(() => {
               <p class="text-gray-900">{{ user.telefono || 'Sin teléfono agregado' }}</p>
             </div>
           </div>
+          <button
+            @click="abrirModalUsuario(user)"
+            class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Editar Información
+          </button>
         </section>
+
+        <!-- Modal para editar información del usuario -->
+        <div v-if="mostrarModalUsuario" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 text-gray-700">
+          <div class="bg-white rounded-lg max-w-lg w-full p-6">
+            <h2 class="text-xl font-bold mb-4">Editar Información Personal</h2>
+            <form @submit.prevent="guardarUsuario">
+              <div class="mb-4">
+                <label class="block text-sm font-medium">Nombre</label>
+                <input v-model="usuarioEditado.name" type="text" class="w-full border p-2 rounded">
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium">Correo Electrónico</label>
+                <input v-model="usuarioEditado.email" type="email" class="w-full border p-2 rounded">
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium">Dirección</label>
+                <input v-model="usuarioEditado.direccion" type="text" class="w-full border p-2 rounded">
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium">Teléfono</label>
+                <input v-model="usuarioEditado.telefono" type="text" class="w-full border p-2 rounded">
+              </div>
+              <div class="flex justify-end gap-2">
+                <button type="button" @click="mostrarModalUsuario = false" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancelar</button>
+                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
 
         <!-- Artículos del Usuario -->
         <section
@@ -234,15 +336,32 @@ onMounted(() => {
           class="bg-white p-6 rounded-lg shadow-md mb-auto">
           <h2 class="text-2xl font-bold mb-4 text-gray-700">Favoritos</h2>
           <ul class="space-y-4">
-            <li class="border-b pb-4">
-              <h3 class="text-lg font-medium">Artículo Favorito 1</h3>
-              <p class="text-sm text-gray-600">Descripción breve del artículo.</p>
-            </li>
-            <li class="border-b pb-4">
-              <h3 class="text-lg font-medium">Artículo Favorito 2</h3>
-              <p class="text-sm text-gray-600">Descripción breve del artículo.</p>
+            <li
+              v-for="favorito in favoritos"
+              :key="favorito.id"
+              class="border-b pb-4 flex items-center gap-4"
+            >
+              <img 
+                :src="favorito.articulo.imagenes && favorito.articulo.imagenes.length > 0 
+                  ? '/storage/' + favorito.articulo.imagenes[0].link 
+                  : '/images/default-placeholder.png'" 
+                alt="Imagen del artículo" 
+                class="w-24 h-24 object-cover rounded"
+              >
+              <div class="flex-1">
+                <h3 class="text-lg font-medium text-gray-900">{{ favorito.articulo.nombre }}</h3>
+                <p class="text-sm text-gray-600">{{ favorito.articulo.descripcion }}</p>
+                <p class="text-sm text-gray-600">Precio: ${{ favorito.articulo.precio }}</p>
+              </div>
+              <button
+                @click="eliminarFavorito(favorito.id)"
+                class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+              >
+                Eliminar
+              </button>
             </li>
           </ul>
+          <p v-if="favoritos.length === 0" class="text-gray-600">No tienes artículos en tus favoritos.</p>
         </section>
       </section>
     </div>

@@ -12,10 +12,7 @@ class FavoritoController extends Controller
  
     public function index()
     {
-        
-        return Favorito::with('usuario', 'articulo')->get();
-
-
+        return Favorito::with('articulo.imagenes')->get(); // Incluye las imágenes del artículo
     }
 
     public function store(Request $request)

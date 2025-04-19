@@ -94,6 +94,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/api/articulos/{articulo}', [ArticuloController::class, 'destroy']);
     Route::delete('/api/articulos/imagenes/{imagen}', [ArticuloController::class, 'eliminarImagen']);
     Route::post('/api/articulos/{articulo}/imagenes', [ArticuloController::class, 'subirImagenes']);
+    Route::get('/api/favoritos', [FavoritoController::class, 'index'])->name('api.favoritos');
+    Route::delete('/favoritos/{favorito}', [FavoritoController::class, 'destroy'])->name('favoritos.destroy');
 });
 
 Route::post('/puntuaciones', [PuntuacionController::class, 'store'])->name('puntuaciones.store');
