@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ArticuloController;
 use App\Http\Controllers\FavoritoController;
 use App\Http\Controllers\PuntuacionController;
+use App\Http\Controllers\CategoriaController;
 use App\Http\Middleware\Denegade;
 
 
@@ -57,9 +58,8 @@ Route::get('/articulos', function () {
 Route::get('/api/articulos', [ArticuloController::class, 'index'])->name('api.articulos');
 
 // Ruta para crear un nuevo artículo
-Route::get('/articulos/create', function () {
-    return Inertia::render('AddArticles');
-})->middleware(['auth', 'verified'])->name('articulos.create');
+Route::get('/articulos/create', [ArticuloController::class, 'create'])->middleware(['auth', 'verified'])->name('articulos.create');
+
 
 // Ruta para almacenar artículos
 Route::post('/articulos', [ArticuloController::class, 'store'])->name('articulos.store');
@@ -103,6 +103,7 @@ Route::get('/puntuaciones/{articuloId}/{userId}', [PuntuacionController::class, 
 
 
 
+Route::get('/categorias', [CategoriaController::class, 'index']);
 
 // Archivos de configuración y autenticación
 require __DIR__.'/settings.php';

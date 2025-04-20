@@ -4,54 +4,74 @@ namespace App\Http\Controllers;
 
 use App\Models\Articulo;
 use App\Models\ImgArticulo;
+use App\Models\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class ArticuloController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        // Iniciar la consulta base
+        $query = Articulo::with('imagenes', 'usuario', 'categoria');
         
-        $articulos = Articulo::with('imagenes', 'usuario')->get();
+        // Aplicar filtro de precio si está presente
+        if ($request->has('precio_max') && is_numeric($request->precio_max)) {
+            $query->where('precio', '<=', $request->precio_max);
+        }
+        
+        // Aplicar filtro de categorías si está presente
+        if ($request->has('categorias') && is_array($request->categorias) && count($request->categorias) > 0) {
+            $query->whereHas('categoria', function($q) use ($request) {
+                $q->whereIn('nombre', $request->categorias);
+            });
+        }
+        
+        $articulos = $query->get();
         return response()->json($articulos);
     }
 
     public function vista()
     {
-       
-        $articulos = Articulo::with('imagenes', 'usuario')->get();
+        $articulos = Articulo::with('imagenes', 'usuario', 'categoria')->get();
+        $categorias = Categoria::all()->pluck('nombre');
+        
         return Inertia::render('Articulos/Index', [
-            'articulos' => $articulos
+            'articulos' => $articulos,
+            'categorias' => $categorias
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('Articulos/Create'); 
+        $categorias = Categoria::all();
+    
+        return Inertia::render('addArticles', [
+            'categorias' => $categorias,
+        ]);
     }
-
+    
     public function store(Request $request)
     {
-       
         $data = $request->validate([
             'nombre' => 'required|string',
             'descripcion' => 'required|string',
             'precio' => 'required|numeric',
             'estado' => 'required|in:disponible,alquilado',
+            'idcategoria' => 'nullable|exists:categorias,id', // Validación para idcategoria
             'imagenes.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
         ]);
 
-       
         $articulo = Articulo::create([
             'nombre' => $data['nombre'],
             'descripcion' => $data['descripcion'],
             'precio' => $data['precio'],
             'estado' => $data['estado'],
+            'idcategoria' => $request->idcategoria, // Guardar el idcategoria
             'usuario_id' => auth()->id(), 
         ]);
 
-      
         if ($request->hasFile('imagenes')) {
             foreach ($request->file('imagenes') as $imagen) {
                 $imagePath = $imagen->store('articulos', 'public');
@@ -67,13 +87,10 @@ class ArticuloController extends Controller
 
     public function show(Articulo $articulo)
     {
-       
-        $articulo->load('categorias', 'usuario', 'imagenes');
+        $articulo->load('categoria', 'usuario', 'imagenes');
         
-      
         $nombreUsuario = $articulo->usuario->name; 
         
-       
         return response()->json([
             'articulo' => $articulo,
             'nombre_usuario' => $nombreUsuario, 
@@ -82,15 +99,14 @@ class ArticuloController extends Controller
 
     public function update(Request $request, Articulo $articulo)
     {
-       
         $data = $request->validate([
             'nombre' => 'string',
             'descripcion' => 'string',
             'precio' => 'numeric',
             'estado' => 'in:disponible,alquilado',
+            'idcategoria' => 'nullable|exists:categorias,id', // Agregar validación para idcategoria
         ]);
 
-       
         $articulo->update($data);
         
         return response()->json([
@@ -101,13 +117,11 @@ class ArticuloController extends Controller
 
     public function destroy(Articulo $articulo)
     {
-        
         foreach ($articulo->imagenes as $imagen) {
             Storage::delete('public/' . $imagen->link);
             $imagen->delete();
         }
 
-       
         $articulo->delete();
         
         return response()->json(['message' => 'Artículo eliminado correctamente']);
@@ -115,7 +129,7 @@ class ArticuloController extends Controller
 
     public function getUserArticulos()
     {
-        $articulos = Articulo::where('usuario_id', auth()->id())->with('imagenes')->get();
+        $articulos = Articulo::where('usuario_id', auth()->id())->with('imagenes', 'categoria')->get();
         return response()->json($articulos);
     }
 
@@ -145,5 +159,11 @@ class ArticuloController extends Controller
 
         return response()->json($imagenes);
     }
+    
+    // Nuevo método para obtener todas las categorías
+    public function getCategorias()
+    {
+        $categorias = Categoria::all()->pluck('nombre');
+        return response()->json($categorias);
+    }
 }
-

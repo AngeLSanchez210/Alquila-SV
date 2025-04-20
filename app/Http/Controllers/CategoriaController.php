@@ -9,7 +9,7 @@ class CategoriaController extends Controller
 {
     public function index()
     {
-        return Categoria::with('articulos')->get();
+        return Categoria::all();
     }
 
     public function store(Request $request)

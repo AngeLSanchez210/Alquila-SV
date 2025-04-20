@@ -1,7 +1,7 @@
 <script setup>
 import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
@@ -13,14 +13,34 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-const priceInput = ref(100);
-const priceRange = ref(100);
+const priceInput = ref(1000);
+const priceRange = ref(1000);
 
 const mostrarModal = ref(false);
 const articuloSeleccionado = ref(null);
 
 const puntuacion = ref(0);
 const comentario = ref('');
+
+// Lista de categorías disponibles
+const categorias = ref([
+  'Herramientas', 'Electrodomésticos', 'Vehículos', 'Ropa y disfraces', 
+  'Deportes', 'Tecnología', 'Muebles', 'Juguetes', 'Jardinería', 
+  'Cámaras y fotografía', 'Audio y video', 'Camping', 'Fiestas y eventos', 
+  'Musicales e instrumentos', 'Oficina', 'Bebés y niños', 
+  'Libros y revistas', 'Gaming', 'Accesorios para autos', 'Maquinaria pesada', 
+  'Artículos de cocina', 'Decoración', 'Fitness y ejercicio', 
+  'Moda y accesorios', 'Fotocabinas', 'Espacios para reuniones', 'Drones', 
+  'Patinetas y bicis', 'Artículos de limpieza', 'Carpas y toldos'
+]);
+
+// Categorías seleccionadas
+const categoriasSeleccionadas = ref({});
+
+// Inicializar el objeto de categorías seleccionadas
+categorias.value.forEach(cat => {
+  categoriasSeleccionadas.value[cat] = false;
+});
 
 const updatePrice = (value) => {
   const maxPrice = 1000;
@@ -30,13 +50,38 @@ const updatePrice = (value) => {
 };
 
 const articulos = ref([]);
+const isLoading = ref(false);
+
+// Observar los cambios en los filtros para actualizar los artículos mostrados
+watch([priceRange, categoriasSeleccionadas], () => {
+  fetchArticulos();
+}, { deep: true });
 
 const fetchArticulos = async () => {
+  isLoading.value = true;
+  
   try {
-    const response = await axios.get('/api/articulos');
+    // Preparar los parámetros de filtrado
+    const params = {
+      precio_max: priceRange.value
+    };
+    
+    // Añadir categorías seleccionadas si hay alguna
+    const categoriasActivas = Object.entries(categoriasSeleccionadas.value)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([nombre]) => nombre);
+    
+    if (categoriasActivas.length > 0) {
+      params.categorias = categoriasActivas;
+    }
+    
+    // Realizar la solicitud con los filtros
+    const response = await axios.get('/api/articulos', { params });
     articulos.value = response.data;
   } catch (error) {
     console.error('Error al obtener los artículos:', error);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -135,6 +180,15 @@ const agregarPuntuacion = async () => {
   }
 };
 
+// Limpiar filtros
+const limpiarFiltros = () => {
+  priceInput.value = 1000;
+  priceRange.value = 1000;
+  
+  Object.keys(categoriasSeleccionadas.value).forEach(cat => {
+    categoriasSeleccionadas.value[cat] = false;
+  });
+};
 </script>
 
 <template>
@@ -144,7 +198,15 @@ const agregarPuntuacion = async () => {
   <section class="flex flex-col lg:flex-row gap-6 bg-gray-100 p-16 text-gray-900">
     <!-- Filtros -->
     <div class="w-full lg:w-80 space-y-6 bg-white p-6 rounded-lg shadow-sm max-h-fit">
-      <h3 class="text-lg font-semibold mb-4 text-gray-900">Filtros</h3>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">Filtros</h3>
+        <button 
+          @click="limpiarFiltros" 
+          class="text-sm text-indigo-600 hover:text-indigo-800"
+        >
+          Limpiar filtros
+        </button>
+      </div>
 
       <!-- Rango de precios -->
       <div class="space-y-4">
@@ -181,9 +243,17 @@ const agregarPuntuacion = async () => {
       <!-- Categorías -->
       <div class="border-t pt-6">
         <h4 class="text-sm font-medium mb-3">Categorías</h4>
-        <div class="space-y-2">
-          <label v-for="(categoria, index) in ['Camisetas', 'Pantalones', 'Sudaderas', 'Accesorios']" :key="index" class="flex items-center gap-2">
-            <input type="checkbox" class="h-4 w-4 text-indigo-600 rounded" />
+        <div class="space-y-2 max-h-60 overflow-y-auto pr-2">
+          <label 
+            v-for="categoria in categorias" 
+            :key="categoria" 
+            class="flex items-center gap-2"
+          >
+            <input 
+              type="checkbox" 
+              v-model="categoriasSeleccionadas[categoria]"
+              class="h-4 w-4 text-indigo-600 rounded" 
+            />
             <span class="text-sm">{{ categoria }}</span>
           </label>
         </div>
@@ -193,47 +263,64 @@ const agregarPuntuacion = async () => {
     <!-- Productos -->
     <div class="flex-1 bg-white">
       <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-        <h2 class="text-2xl font-bold tracking-tight text-gray-900">Mostrando artículos</h2>
-        <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
+        <div class="flex justify-between items-center">
+          <h2 class="text-2xl font-bold tracking-tight text-gray-900">
+            Mostrando artículos ({{ articulos.length }})
+          </h2>
+        </div>
+        
+        <div v-if="isLoading" class="flex justify-center items-center h-64">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        </div>
+
+        <div v-else-if="articulos.length === 0" class="flex justify-center items-center h-64">
+          <p class="text-gray-500 text-lg">No se encontraron artículos con los filtros seleccionados</p>
+        </div>
+
+        <div v-else class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
           <div
-  v-for="articulo in articulos"
-  :key="articulo.id"
-  class="bg-white rounded-xl shadow-md overflow-hidden flex flex-col transition-transform transform hover:-translate-y-1 hover:shadow-lg"
->
-  <swiper
-    :modules="[Navigation, Pagination]"
-    navigation
-    pagination
-    class="w-full h-60"
-  >
-    <swiper-slide v-for="imagen in articulo.imagenes" :key="imagen.id">
-      <img
-        :src="imagen.link ? `/storage/${imagen.link}` : 'https://via.placeholder.com/300x200'"
-        :alt="articulo.nombre"
-        class="w-full h-60 object-cover"
-      />
-    </swiper-slide>
-  </swiper>
+            v-for="articulo in articulos"
+            :key="articulo.id"
+            class="bg-white rounded-xl shadow-md overflow-hidden flex flex-col transition-transform transform hover:-translate-y-1 hover:shadow-lg"
+          >
+            <swiper
+              :modules="[Navigation, Pagination]"
+              navigation
+              pagination
+              class="w-full h-60"
+            >
+              <swiper-slide v-for="imagen in articulo.imagenes" :key="imagen.id">
+                <img
+                  :src="imagen.link ? `/storage/${imagen.link}` : 'https://via.placeholder.com/300x200'"
+                  :alt="articulo.nombre"
+                  class="w-full h-60 object-cover"
+                />
+              </swiper-slide>
+            </swiper>
 
-  <div class="p-4 flex flex-col justify-between flex-grow">
-    <div class="mb-3">
-      <h3 class="text-lg font-semibold text-gray-900 truncate">{{ articulo.nombre }}</h3>
-      <p class="text-sm text-gray-600 mt-1 line-clamp-2">{{ articulo.descripcion }}</p>
-    </div>
-    
-    <div class="mt-auto">
-      <p class="text-indigo-600 font-bold text-lg mb-3">${{ articulo.precio }}</p>
-      <button
-        @click.stop.prevent="abrirDetalles(articulo)"
-        class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition"
-      >
-        Ver más
-      </button>
-    </div>
-  </div>
-</div>
-</div>
+            <div class="p-4 flex flex-col justify-between flex-grow">
+              <div class="mb-3">
+                <h3 class="text-lg font-semibold text-gray-900 truncate">{{ articulo.nombre }}</h3>
+                <p class="text-sm text-gray-600 mt-1 line-clamp-2">{{ articulo.descripcion }}</p>
+              </div>
+              
+              <div class="mt-auto">
+                <p class="text-indigo-600 font-bold text-lg mb-3">${{ articulo.precio }}</p>
+                <p class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full mb-2">
+                  Categoría: {{ articulo.categoria?.nombre || 'Sin categoría' }}
+                </p>
 
+
+                <button
+                  @click.stop.prevent="abrirDetalles(articulo)"
+                  class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition"
+                >
+                  Ver más
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
