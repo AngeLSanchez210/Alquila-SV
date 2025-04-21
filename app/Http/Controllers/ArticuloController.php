@@ -116,17 +116,31 @@ class ArticuloController extends Controller
     }
 
     public function destroy(Articulo $articulo)
-    {
+{
+    try {
+        // Verificar que el usuario actual es el propietario del artículo
+        if ($articulo->usuario_id !== auth()->id()) {
+            return response()->json(['error' => 'No autorizado'], 403);
+        }
+        
+        // Eliminar imágenes asociadas
         foreach ($articulo->imagenes as $imagen) {
-            Storage::delete('public/' . $imagen->link);
+            if (Storage::exists('public/' . $imagen->link)) {
+                Storage::delete('public/' . $imagen->link);
+            }
             $imagen->delete();
         }
 
+        // Eliminar artículo
         $articulo->delete();
         
         return response()->json(['message' => 'Artículo eliminado correctamente']);
+    } catch (\Exception $e) {
+        // Registrar el error
+        \Log::error('Error al eliminar artículo: ' . $e->getMessage());
+        return response()->json(['error' => 'Error al eliminar el artículo'], 500);
     }
-
+}
     public function getUserArticulos()
     {
         $articulos = Articulo::where('usuario_id', auth()->id())->with('imagenes', 'categoria')->get();

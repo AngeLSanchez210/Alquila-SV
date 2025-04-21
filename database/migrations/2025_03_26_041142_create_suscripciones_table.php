@@ -15,12 +15,13 @@ return new class extends Migration
         $table->id();
         $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
         $table->foreignId('articulo_id')->constrained('articulos')->onDelete('cascade');
-        $table->foreignId('plan_id')->constrained('planes'); // Relación con la tabla de planes
+        $table->foreignId('plan_id')->constrained('planes_alquila')->onDelete('cascade'); 
         $table->timestamp('fecha_inicio');
         $table->timestamp('fecha_fin')->nullable();
         $table->enum('estado', ['activa', 'cancelada']);
         $table->timestamps();
     });
+    
 }
 
 

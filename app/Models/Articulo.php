@@ -31,10 +31,6 @@ class Articulo extends Model
     {
         return $this->hasMany(Puntuacion::class, 'articulo_id');
     }
-    public function suscripciones()
-    {
-        return $this->hasMany(Suscripcion::class);
-    }
 
    
     public function imagenes()
