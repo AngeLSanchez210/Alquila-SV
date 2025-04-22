@@ -82,7 +82,10 @@ class ArticuloController extends Controller
             }
         }
 
-        return redirect()->route('articulos')->with('success', 'Artículo creado con éxito.');
+        return response()->json([
+            'message' => 'Artículo creado con éxito.',
+            'articulo' => $articulo,
+        ]);
     }
 
     public function show(Articulo $articulo)
@@ -180,4 +183,33 @@ class ArticuloController extends Controller
         $categorias = Categoria::all()->pluck('nombre');
         return response()->json($categorias);
     }
+
+    public function apiSearch(Request $request)
+    {
+        $query = $request->input('q');
+    
+        $articulos = Articulo::where('nombre', 'like', "%$query%")
+            ->orWhere('descripcion', 'like', "%$query%")
+            ->orWhereHas('categoria', function ($q) use ($query) {
+                $q->where('nombre', 'like', "%$query%");
+            })
+            ->limit(10)
+            ->get();
+    
+        return response()->json($articulos);
+    }
+    
+    
+public function ver(Articulo $articulo)
+{
+    $articulo->load('categoria', 'usuario', 'imagenes');
+
+    return Inertia::render('ArticuloDetalle', [
+        'articulo' => $articulo
+    ]);
+}
+
+
+
+
 }

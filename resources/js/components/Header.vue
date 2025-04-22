@@ -1,40 +1,62 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import { router } from '@inertiajs/vue3'
-import { route } from 'ziggy-js'
-
+import { router } from '@inertiajs/vue3';
+import { route } from 'ziggy-js';
+import axios from 'axios';
 
 const isMobileMenuOpen = ref(false);
-const { props } = usePage(); // Accede a las propiedades de la página, incluyendo el usuario autenticado
+const { props } = usePage();
+
+const searchQuery = ref('');
+const searchResults = ref([]);
+const showDropdown = ref(false);
+
+watch(searchQuery, async (newVal) => {
+  if (newVal.length < 2) {
+    searchResults.value = [];
+    showDropdown.value = false;
+    return;
+  }
+
+  try {
+    const response = await axios.get(route('api.articulos.search'), {
+      params: { q: newVal }
+    });
+    searchResults.value = response.data;
+    showDropdown.value = true;
+  } catch (error) {
+    console.error(error);
+  }
+});
 
 const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value; // Alterna el estado del menú móvil
+  isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
 
 const closeMobileMenu = () => {
-  isMobileMenuOpen.value = false; // Cierra el menú móvil
+  isMobileMenuOpen.value = false;
 };
 
 const toggleMenu = () => {
   const menu = document.getElementById('profile-menu');
-  menu?.classList.toggle('hidden'); // Alterna la clase 'hidden' para mostrar/ocultar el menú
+  menu?.classList.toggle('hidden');
 };
 
 const closeProfileMenu = () => {
   const menu = document.getElementById('profile-menu');
-  menu?.classList.add('hidden'); // Cierra el menú de perfil
+  menu?.classList.add('hidden');
 };
 
 const redirectToProfile = () => {
-  const userId = props.auth.user.id; // Obtén el ID del usuario autenticado
-  window.location.href = `/user/${userId}`; // Redirige a la ruta del perfil del usuario
+  const userId = props.auth.user.id;
+  window.location.href = `/user/${userId}`;
 };
 
 onMounted(() => {
   document.addEventListener('click', (event) => {
-    const mobileMenu = document.querySelector('.mobile-menu'); // Clase del menú móvil
-    const mobileToggleButton = document.querySelector('.mobile-menu-toggle'); // Botón de alternar menú
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const mobileToggleButton = document.querySelector('.mobile-menu-toggle');
     const profileMenu = document.getElementById('profile-menu');
     const avatar = document.querySelector('[data-popover-target="profile-menu"]');
     if (
@@ -43,13 +65,22 @@ onMounted(() => {
       !mobileMenu.contains(event.target) &&
       !mobileToggleButton.contains(event.target)
     ) {
-      closeMobileMenu(); // Cierra el menú móvil si se hace clic fuera de él
+      closeMobileMenu();
     }
     if (profileMenu && avatar && !profileMenu.contains(event.target) && !avatar.contains(event.target)) {
-      closeProfileMenu(); // Cierra el menú de perfil si se hace clic fuera de él
+      closeProfileMenu();
+    }
+    if (!event.target.closest('.autocomplete-wrapper')) {
+      showDropdown.value = false;
     }
   });
 });
+
+const goToArticulo = (id) => {
+  router.visit(route('articulos.ver', id));
+};
+
+
 
 const menuItems = [
   { name: 'Inicio', href: '/' },
@@ -102,21 +133,50 @@ const menuItems = [
             </div>
           </div>
 
-
           <div class="lg:ml-6 flex items-center flex-grow">
             <!-- Search -->
-            <div class="flex flex-grow">
-              <div class="group flex items-center rounded-full border border-gray-300 p-2 focus-within:ring-2 focus-within:ring-indigo-500 w-full">
-                <svg class="h-5 w-5 opacity-50 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <div class="relative w-full autocomplete-wrapper">
+              <div class="flex items-center border border-gray-300 rounded-md shadow-sm px-3 py-2 bg-white focus-within:ring-2 focus-within:ring-indigo-500">
+                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                   <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
                     <circle cx="11" cy="11" r="8"></circle>
                     <path d="m21 21-4.3-4.3"></path>
                   </g>
                 </svg>
-                <input type="search" required placeholder="Search" class="flex-1 ml-2 outline-none bg-white text-gray-700" />
+                <input
+                  type="search"
+                  v-model="searchQuery"
+                  placeholder="Buscar artículos..."
+                  class="flex-1 ml-3 outline-none text-gray-800 bg-transparent placeholder-gray-400 text-sm"
+                />
+              </div>
+
+              <!-- Dropdown de resultados -->
+              <div
+                v-if="showDropdown && searchResults.length"
+                class="absolute z-50 w-full bg-white shadow-lg rounded-md mt-1 border border-gray-200 max-h-96 overflow-auto"
+              >
+                <div
+                  v-for="item in searchResults"
+                  :key="item.id"
+                  @click="goToArticulo(item.id)"
+                  class="flex items-center justify-between p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100"
+                >
+                  <div>
+                    <p class="text-sm font-medium text-gray-800">{{ item.nombre }}</p>
+                    <p class="text-blue-600 font-bold text-sm">${{ parseFloat(item.precio).toFixed(2) }}</p>
+                  </div>
+                  <img
+                    v-if="item.imagenes && item.imagenes.length"
+                    :src="`/storage/${item.imagenes[0].link}`"
+                    class="w-12 h-12 object-cover rounded ml-3"
+                    alt="preview"
+                  />
+                </div>
               </div>
             </div>
           </div>
+
 
           <div class="ml-auto flex items-center">
             <!-- Following -->

@@ -76,6 +76,8 @@ Route::get('/admin/items', function () {
 })->name('admin.items');
 
 
+Route::get('/articulos/search', [ArticuloController::class, 'apiSearch'])->name('api.articulos.search');
+
 
 
 
@@ -101,6 +103,9 @@ Route::middleware(['auth'])->group(function () {
 Route::post('/puntuaciones', [PuntuacionController::class, 'store'])->name('puntuaciones.store');
 Route::get('/puntuaciones/{articuloId}/{userId}', [PuntuacionController::class, 'verificarPuntuacion']);
 
+
+// Ruta para ver el detalle de un solo artículo
+Route::get('/articulos/ver/{articulo}', [ArticuloController::class, 'ver'])->name('articulos.ver');
 
 
 Route::get('/categorias', [CategoriaController::class, 'index']);

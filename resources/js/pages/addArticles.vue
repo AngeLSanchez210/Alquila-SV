@@ -4,6 +4,8 @@ import { router } from '@inertiajs/vue3';
 import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
 import Swal from 'sweetalert2';
+import axios from 'axios';
+
 // Definir las propiedades esperadas
 interface Categoria {
     id: number;
@@ -40,56 +42,58 @@ const onFileChange = (event: Event) => {
     }
 };
 
+const fileInputRef = ref<HTMLInputElement | null>(null); // referencia al input de archivos
+
 const submit = () => {
-    const formData = new FormData();
-    formData.append('nombre', form.value.nombre);
-    formData.append('descripcion', form.value.descripcion);
-    formData.append('precio', form.value.precio);
-    formData.append('estado', form.value.estado);
-    formData.append('idcategoria', form.value.idcategoria);
+  const formData = new FormData();
+  formData.append('nombre', form.value.nombre);
+  formData.append('descripcion', form.value.descripcion);
+  formData.append('precio', form.value.precio);
+  formData.append('estado', form.value.estado);
+  formData.append('idcategoria', form.value.idcategoria);
 
-    form.value.imagenes.forEach((imagen, index) => {
-        formData.append(`imagenes[${index}]`, imagen);
-    });
+  form.value.imagenes.forEach((imagen, index) => {
+    formData.append(`imagenes[${index}]`, imagen);
+  });
 
-    router.post('/articulos', formData, {
-        onSuccess: () => {
-            Swal.fire({
-                title: '¡Artículo guardado!',
-                text: '¿Deseas agregar otro artículo o volver al inicio?',
-                icon: 'success',
-                showCancelButton: true,
-                confirmButtonText: 'Agregar otro',
-                cancelButtonText: 'Volver al inicio',
-                confirmButtonColor: '#22c55e',
-                cancelButtonColor: '#3b82f6',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Reiniciar el formulario
-                    form.value = {
-                        nombre: '',
-                        descripcion: '',
-                        precio: '',
-                        estado: 'disponible',
-                        idcategoria: '',
-                        imagenes: [],
-                    };
-                } else {
-                    router.visit('/');
-                }
-            });
-        },
-        onError: (errors) => {
-            Swal.fire({
-                title: 'Error',
-                text: 'Hubo un problema al guardar el artículo.',
-                icon: 'error',
-                confirmButtonColor: '#ef4444'
-            });
+  axios.post('/articulos', formData)
+  .then(() => {
+    Swal.fire({
+      title: '¡Artículo guardado!',
+      text: '¿Deseas agregar otro artículo o volver al inicio?',
+      icon: 'success',
+      showCancelButton: true,
+      confirmButtonText: 'Agregar otro',
+      cancelButtonText: 'Volver al inicio',
+      confirmButtonColor: '#22c55e',
+      cancelButtonColor: '#3b82f6',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Resetear campos
+        form.value.nombre = '';
+        form.value.descripcion = '';
+        form.value.precio = '';
+        form.value.estado = 'disponible';
+        form.value.idcategoria = '';
+        form.value.imagenes = [];
+
+        if (fileInputRef.value) {
+          fileInputRef.value.value = '';
         }
+      } else {
+        router.visit('/');
+      }
     });
+  })
+  .catch(() => {
+    Swal.fire({
+      title: 'Error',
+      text: 'Hubo un problema al guardar el artículo.',
+      icon: 'error',
+      confirmButtonColor: '#ef4444'
+    });
+  });
 };
-
 
 
 </script>

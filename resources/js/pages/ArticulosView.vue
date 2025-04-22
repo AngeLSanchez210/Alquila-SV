@@ -5,8 +5,6 @@ import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
-
-// Swiper.js
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -15,32 +13,29 @@ import "swiper/css/pagination";
 
 const priceInput = ref(1000);
 const priceRange = ref(1000);
-
 const mostrarModal = ref(false);
 const articuloSeleccionado = ref(null);
-
 const puntuacion = ref(0);
 const comentario = ref('');
+const articulos = ref([]);
+const isLoading = ref(false);
+const user = usePage().props.auth.user;
 
-// Lista de categorías disponibles
 const categorias = ref([
-  'Herramientas', 'Electrodomésticos', 'Vehículos', 'Ropa y disfraces', 
-  'Deportes', 'Tecnología', 'Muebles', 'Juguetes', 'Jardinería', 
-  'Cámaras y fotografía', 'Audio y video', 'Camping', 'Fiestas y eventos', 
-  'Musicales e instrumentos', 'Oficina', 'Bebés y niños', 
-  'Libros y revistas', 'Gaming', 'Accesorios para autos', 'Maquinaria pesada', 
-  'Artículos de cocina', 'Decoración', 'Fitness y ejercicio', 
-  'Moda y accesorios', 'Fotocabinas', 'Espacios para reuniones', 'Drones', 
-  'Patinetas y bicis', 'Artículos de limpieza', 'Carpas y toldos'
+  'Herramientas', 'Electrodomésticos', 'Vehículos', 'Ropa y disfraces', 'Deportes', 'Tecnología', 'Muebles', 'Juguetes', 'Jardinería', 'Cámaras y fotografía', 'Audio y video', 'Camping', 'Fiestas y eventos', 'Musicales e instrumentos', 'Oficina', 'Bebés y niños', 'Libros y revistas', 'Gaming', 'Accesorios para autos', 'Maquinaria pesada', 'Artículos de cocina', 'Decoración', 'Fitness y ejercicio', 'Moda y accesorios', 'Fotocabinas', 'Espacios para reuniones', 'Drones', 'Patinetas y bicis', 'Artículos de limpieza', 'Carpas y toldos'
 ]);
 
-// Categorías seleccionadas
 const categoriasSeleccionadas = ref({});
+categorias.value.forEach(cat => categoriasSeleccionadas.value[cat] = false);
 
-// Inicializar el objeto de categorías seleccionadas
-categorias.value.forEach(cat => {
-  categoriasSeleccionadas.value[cat] = false;
-});
+// Leer categoría desde la URL y marcarla
+const page = usePage();
+const routeParams = page.url.split('?')[1];
+const urlParams = new URLSearchParams(routeParams);
+const categoriaDesdeURL = urlParams.get('categoria');
+if (categoriaDesdeURL && categoriasSeleccionadas.value.hasOwnProperty(categoriaDesdeURL)) {
+  categoriasSeleccionadas.value[categoriaDesdeURL] = true;
+}
 
 const updatePrice = (value) => {
   const maxPrice = 1000;
@@ -49,33 +44,16 @@ const updatePrice = (value) => {
   priceRange.value = numericValue;
 };
 
-const articulos = ref([]);
-const isLoading = ref(false);
-
-// Observar los cambios en los filtros para actualizar los artículos mostrados
 watch([priceRange, categoriasSeleccionadas], () => {
   fetchArticulos();
 }, { deep: true });
 
 const fetchArticulos = async () => {
   isLoading.value = true;
-  
   try {
-    // Preparar los parámetros de filtrado
-    const params = {
-      precio_max: priceRange.value
-    };
-    
-    // Añadir categorías seleccionadas si hay alguna
-    const categoriasActivas = Object.entries(categoriasSeleccionadas.value)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([nombre]) => nombre);
-    
-    if (categoriasActivas.length > 0) {
-      params.categorias = categoriasActivas;
-    }
-    
-    // Realizar la solicitud con los filtros
+    const params = { precio_max: priceRange.value };
+    const categoriasActivas = Object.entries(categoriasSeleccionadas.value).filter(([_, isSelected]) => isSelected).map(([nombre]) => nombre);
+    if (categoriasActivas.length > 0) params.categorias = categoriasActivas;
     const response = await axios.get('/api/articulos', { params });
     articulos.value = response.data;
   } catch (error) {
@@ -85,111 +63,54 @@ const fetchArticulos = async () => {
   }
 };
 
-const abrirDetalles = (articulo) => {
-  articuloSeleccionado.value = articulo;
-  mostrarModal.value = true;
-};
-
-const cerrarModal = () => {
-  mostrarModal.value = false;
-};
-
-onMounted(() => {
-  fetchArticulos();
-});
-
+const abrirDetalles = (articulo) => { articuloSeleccionado.value = articulo; mostrarModal.value = true; };
+const cerrarModal = () => { mostrarModal.value = false; };
+onMounted(() => { fetchArticulos(); });
 axios.defaults.withCredentials = true;
-
-const user = usePage().props.auth.user;
 
 const agregarAFavoritos = async () => {
   if (!user || !articuloSeleccionado.value) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Debes iniciar sesión',
-      text: 'Inicia sesión para agregar el artículo a tus favoritos.',
-    });
+    Swal.fire({ icon: 'warning', title: 'Debes iniciar sesión', text: 'Inicia sesión para agregar el artículo a tus favoritos.' });
     return;
   }
-
   try {
-    const response = await axios.post('/api/favoritos', {
-      articulo_id: articuloSeleccionado.value.id
-    });
-
-    if (response.data.message === 'Ya está agregado en favoritos') {
-      Swal.fire({
-        icon: 'info',
-        title: 'Ya en favoritos',
-        text: 'Este artículo ya está en tu lista de favoritos.',
-      });
-    } else {
-      Swal.fire({
-        icon: 'success',
-        title: '¡Éxito!',
-        text: response.data.message,
-      });
-    }
+    const response = await axios.post('/api/favoritos', { articulo_id: articuloSeleccionado.value.id });
+    Swal.fire({ icon: 'success', title: '¡Éxito!', text: response.data.message });
   } catch (error) {
     console.error("Error al agregar a favoritos:", error);
-    Swal.fire({
-      icon: 'error',
-      title: '¡Error!',
-      text: 'Hubo un problema al guardar el favorito. Intenta nuevamente.',
-    });
+    Swal.fire({ icon: 'error', title: '¡Error!', text: 'Hubo un problema al guardar el favorito. Intenta nuevamente.' });
   }
 };
 
 const agregarPuntuacion = async () => {
   if (!user || !articuloSeleccionado.value || !puntuacion.value) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Debes iniciar sesión y proporcionar una puntuación',
-      text: 'Inicia sesión para agregar una puntuación al artículo.',
-    });
+    Swal.fire({ icon: 'warning', title: 'Debes iniciar sesión y proporcionar una puntuación', text: 'Inicia sesión para agregar una puntuación al artículo.' });
     return;
   }
-
   try {
     await axios.post('/puntuaciones', {
       articulo_id: articuloSeleccionado.value.id,
       puntuacion: puntuacion.value,
       comentario: comentario.value || "",
     });
-
-    Swal.fire({
-      icon: 'success',
-      title: '¡Puntuación agregada!',
-      text: 'Tu puntuación se ha registrado correctamente.',
-    });
+    Swal.fire({ icon: 'success', title: '¡Puntuación agregada!', text: 'Tu puntuación se ha registrado correctamente.' });
   } catch (error) {
-    if (error.response && error.response.status === 409) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Ya puntuaste este artículo',
-        text: 'Solo puedes puntuar una vez por artículo.',
-      });
+    if (error.response?.status === 409) {
+      Swal.fire({ icon: 'info', title: 'Ya puntuaste este artículo', text: 'Solo puedes puntuar una vez por artículo.' });
     } else {
       console.error("Error al agregar puntuación:", error);
-      Swal.fire({
-        icon: 'error',
-        title: '¡Error!',
-        text: 'Hubo un problema al guardar la puntuación. Intenta nuevamente.',
-      });
+      Swal.fire({ icon: 'error', title: '¡Error!', text: 'Hubo un problema al guardar la puntuación. Intenta nuevamente.' });
     }
   }
 };
 
-// Limpiar filtros
 const limpiarFiltros = () => {
   priceInput.value = 1000;
   priceRange.value = 1000;
-  
-  Object.keys(categoriasSeleccionadas.value).forEach(cat => {
-    categoriasSeleccionadas.value[cat] = false;
-  });
+  Object.keys(categoriasSeleccionadas.value).forEach(cat => { categoriasSeleccionadas.value[cat] = false; });
 };
 </script>
+
 
 <template>
   <Header />
@@ -364,14 +285,25 @@ const limpiarFiltros = () => {
             </div>
 
             <!-- Contactar -->
-            <button class="w-full bg-indigo-600 py-3 px-8 rounded-md font-medium text-white hover:bg-indigo-700">Contactar vendedor</button>
+                  <a
+                    v-if="articuloSeleccionado.usuario?.telefono"
+                    :href="`https://wa.me/503${articuloSeleccionado.usuario.telefono}?text=Hola ${articuloSeleccionado.usuario.name}, estoy interesad@ en tu artículo '${articuloSeleccionado.nombre}'. ¿Me podrías dar más información?`"
+                    target="_blank"
+                    class="mt-4 w-full inline-flex justify-center items-center gap-2 bg-green-500 py-3 px-8 rounded-md font-semibold text-white hover:bg-green-600 transition"
+                  >
+                   Contactar por WhatsApp
+                  </a>
+
+
+
+
 
             <!-- Favoritos -->
             <button
               @click.stop.prevent="agregarAFavoritos"
               class="w-full bg-yellow-400 py-3 px-8 rounded-md font-medium text-black hover:bg-yellow-500 mb-4"
             >
-              Agregar a favoritos ❤️
+              Agregar a favoritos 
             </button>
 
             <!-- Puntuación -->

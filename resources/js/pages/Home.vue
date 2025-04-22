@@ -1,6 +1,15 @@
 <script setup>
 import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
+import { router } from '@inertiajs/vue3';
+
+const irAFiltradosPorCategoria = (categoria) => {
+  router.visit('/articulos', {
+    data: { categoria },
+    method: 'get',
+    preserveScroll: true,
+  });
+};
 </script>
 
 <template>
@@ -62,46 +71,44 @@ import Footer from '@/components/Footer.vue';
       </div>
 
       <!-- Featured Categories Section -->
-      <div class="bg-white">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div class="mx-auto max-w-2xl py-16 sm:py-24 lg:max-w-none lg:py-25">
-            <h2 class="text-2xl font-bold text-gray-900">Alquila por categorías</h2>
-      
-            <div class="mt-6 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:space-y-0">
-              <div class="group relative">
-                <img src="https://images.unsplash.com/photo-1581244277943-fe4a9c777189?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1771&q=80" alt="Herramientas eléctricas y de construcción" class="w-full rounded-lg bg-white object-cover group-hover:opacity-75 max-sm:h-80 sm:aspect-2/1 lg:aspect-square">
-                <h3 class="mt-6 text-sm text-gray-500">
-                  <a href="#">
-                    <span class="absolute inset-0"></span>
-                    Herramientas
-                  </a>
-                </h3>
-                <p class="text-base font-semibold text-gray-900">Todo para construcción y reparaciones</p>
-              </div>
-              <div class="group relative">
-                <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" alt="Equipo audiovisual para eventos" class="w-full rounded-lg bg-white object-cover group-hover:opacity-75 max-sm:h-80 sm:aspect-2/1 lg:aspect-square">
-                <h3 class="mt-6 text-sm text-gray-500">
-                  <a href="#">
-                    <span class="absolute inset-0"></span>
-                    Equipos para eventos
-                  </a>
-                </h3>
-                <p class="text-base font-semibold text-gray-900">Sonido, iluminación y más</p>
-              </div>
-              <div class="group relative">
-                <img src="https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" alt="Equipos para viaje y aventura" class="w-full rounded-lg bg-white object-cover group-hover:opacity-75 max-sm:h-80 sm:aspect-2/1 lg:aspect-square">
-                <h3 class="mt-6 text-sm text-gray-500">
-                  <a href="#">
-                    <span class="absolute inset-0"></span>
-                    Aventura
-                  </a>
-                </h3>
-                <p class="text-base font-semibold text-gray-900">Equipos para viaje y camping</p>
-              </div>
-            </div>
+  <div class="bg-white">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl py-16 sm:py-24 lg:max-w-none lg:py-25">
+        <h2 class="text-2xl font-bold text-gray-900">Alquila por categorías</h2>
+
+        <div class="mt-6 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:space-y-0">
+          <div class="group relative">
+            <a :href="`/articulos?categoria=${encodeURIComponent('Herramientas')}`">
+              <img src="https://images.unsplash.com/photo-1581244277943-fe4a9c777189?ixlib=rb-4.0.3&auto=format&fit=crop&w=1771&q=80" alt="Herramientas" class="w-full rounded-lg object-cover group-hover:opacity-75 max-sm:h-80 sm:aspect-2/1 lg:aspect-square">
+              <h3 class="mt-6 text-sm text-gray-500">Herramientas</h3>
+              <p class="text-base font-semibold text-gray-900">Todo para construcción y reparaciones</p>
+            </a>
           </div>
+
+          <div class="group relative">
+            <a :href="`/articulos?categoria=${encodeURIComponent('Equipos para eventos')}`">
+              <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80" alt="Eventos" class="w-full rounded-lg object-cover group-hover:opacity-75 max-sm:h-80 sm:aspect-2/1 lg:aspect-square">
+              <h3 class="mt-6 text-sm text-gray-500">Equipos para eventos</h3>
+              <p class="text-base font-semibold text-gray-900">Sonido, iluminación y más</p>
+            </a>
+          </div>
+
+          <div class="group relative">
+              <a :href="`/articulos?categoria=${encodeURIComponent('Muebles')}`">
+                <img 
+                  src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80" 
+                  alt="Muebles para el hogar y eventos" 
+                  class="w-full rounded-lg object-cover group-hover:opacity-75 max-sm:h-80 sm:aspect-2/1 lg:aspect-square"
+                >
+                <h3 class="mt-6 text-sm text-gray-500">Muebles</h3>
+                <p class="text-base font-semibold text-gray-900">Para el hogar, oficina o eventos</p>
+              </a>
+            </div>
+
         </div>
       </div>
+    </div>
+  </div>
     </main>
 
      <!-- Benefits Section -->
@@ -112,10 +119,22 @@ import Footer from '@/components/Footer.vue';
             <br class="hidden lg:inline-block">y disfruta de todos los beneficios
           </h1>
           <p class="mb-8 mt-3 leading-relaxed">Accede a nuestro catálogo completo de productos para alquilar, recibe recomendaciones personalizadas según tus necesidades y obtén descuentos exclusivos en tus primeros alquileres. Ahorra dinero alquilando en lugar de comprar equipo que usarás pocas veces.</p>
-          <div class="flex justify-center">
-            <button class="inline-flex text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg">Registrarse</button>
-            <button class="ml-4 inline-flex text-gray-700 bg-gray-100 border-0 py-2 px-6 focus:outline-none hover:bg-gray-200 rounded text-lg">Ver catálogo</button>
-          </div>
+          <div class="flex justify-center gap-4">
+                <button
+                  @click="$inertia.visit(route('register'))"
+                  class="inline-flex items-center justify-center text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg transition"
+                >
+                  Registrarse
+                </button>
+
+                <a
+                  href="/articulos"
+                  class="inline-flex items-center justify-center text-white bg-indigo-600 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-700 rounded text-lg transition"
+                >
+                  Ver catálogo
+                </a>
+              </div>
+
         </div>
         <div class="lg:max-w-lg lg:w-full md:w-1/2 w-5/6">
           <img class="object-cover object-center rounded" alt="Persona feliz alquilando equipo" src="https://images.unsplash.com/photo-1560438718-eb61ede255eb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80">
