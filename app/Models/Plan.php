@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Plan extends Model
 {
     use HasFactory;
+
     protected $table = 'planes_alquila'; // Nombre de la tabla en la base de datos
 
-    protected $fillable = ['nombre', 'max_publicaciones', 'destacar', 'precio'];
+    protected $fillable = ['nombre', 'max_publicaciones', 'destacar', 'precio', 'beneficios']; // Se agrega 'beneficios'
 }

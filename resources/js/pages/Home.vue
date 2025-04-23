@@ -13,13 +13,13 @@ const irAFiltradosPorCategoria = (categoria) => {
 </script>
 
 <template>
-  <Header></Header>
+  <Header class="relative z-50"></Header>
 
   <body class="bg-gray-100">
     <!-- Main Content -->
     <main class="mx-auto text-gray-800">
       <!-- Hero Section -->
-      <div class="relative overflow-hidden bg-white w-full mb-1">
+      <div class="relative overflow-hidden bg-white w-full mb-1 z-10">
         <div class="pt-16 pb-80 sm:pt-24 sm:pb-40 lg:pt-40 lg:pb-48">
           <div class="relative mx-auto max-w-7xl px-4 sm:static sm:px-6 lg:px-8">
             <div class="sm:max-w-lg">

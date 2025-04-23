@@ -168,9 +168,21 @@ const eliminarFavorito = async (favoritoId) => {
 };
 
 onMounted(() => {
+  // Obtener parámetros de la URL
+  const params = new URLSearchParams(window.location.search);
+  const section = params.get('section'); // Obtener el valor del parámetro 'section'
+
+  // Establecer la sección activa si existe en la URL
+  if (section) {
+    setActiveSection(section);
+  }
+
   fetchArticulos();
   fetchFavoritos();
 });
+const redirectToCreateArticulo = () => {
+  window.location.href = '/articulos/create';
+};
 </script>
 
 <template>
@@ -272,7 +284,14 @@ onMounted(() => {
         <section
           v-if="activeSection === 'articles'"
           class="bg-white p-6 rounded-lg shadow-md mb-auto">
-          <h2 class="text-2xl font-bold mb-4 text-gray-700">Artículos Publicados</h2>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold text-gray-700">Artículos Publicados</h2>
+            <button 
+              @click="redirectToCreateArticulo" 
+              class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+              Agregar Artículo
+            </button>
+          </div>
           <ul class="space-y-4">
             <li v-for="articulo in articulos" :key="articulo.id" class="border-b pb-4 flex items-center gap-4">
               <img :src="'/storage/' + articulo.imagenes[0]?.link" alt="Imagen del artículo" class="w-24 h-24 object-cover rounded">

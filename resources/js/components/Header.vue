@@ -48,9 +48,9 @@ const closeProfileMenu = () => {
   menu?.classList.add('hidden');
 };
 
-const redirectToProfile = () => {
+function redirectToUserInfo (section){
   const userId = props.auth.user.id;
-  window.location.href = `/user/${userId}`;
+  window.location.href = `/user/${userId}?section=${section}`;
 };
 
 onMounted(() => {
@@ -83,7 +83,6 @@ const goToArticulo = (id) => {
 
 
 const menuItems = [
-  { name: 'Inicio', href: '/' },
   { name: 'Vehículos', href: '#' },
   { name: 'Herramientas', href: '#' },
   { name: 'Tecnología', href: '#' },
@@ -179,18 +178,18 @@ const menuItems = [
 
 
           <div class="ml-auto flex items-center">
-            <!-- Following -->
+            <!-- Following
             <div class="ml-4 flow-root lg:ml-6">
               <a href="#" class="group -m-2 flex items-center p-2">
                 <svg class="size-6 shrink-0 text-gray-400 group-hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
                 </svg>
               </a>
-            </div>
+            </div> -->
 
             <!-- Likes -->
-            <div class="ml-4 flow-root lg:ml-6">
-              <a href="#" class="group -m-2 flex items-center p-2">
+            <div class="ml-4 flow-root lg:ml-6 cursor-pointer">
+              <a @click="redirectToUserInfo('favorites')" class="cursor:pointer group -m-2 flex items-center p-2">
                 <svg class="size-6 shrink-0 text-gray-400 group-hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                 </svg>
@@ -218,7 +217,7 @@ const menuItems = [
                     tabIndex="-1"
                     role="menuitem"
                     class="text-gray-600 hover:text-gray-900 flex w-full cursor-pointer select-none items-center gap-2 rounded-md px-3 pt-[9px] pb-2 text-start leading-tight outline-none transition-all hover:bg-blue-gray-50 hover:bg-opacity-80 hover:text-blue-gray-900 focus:bg-blue-gray-50 focus:bg-opacity-80 focus:text-blue-gray-900 active:bg-blue-gray-50 active:bg-opacity-80 active:text-blue-gray-900"
-                    @click="closeProfileMenu(); redirectToProfile()"
+                    @click="closeProfileMenu(); redirectToUserInfo('info')"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -243,7 +242,7 @@ const menuItems = [
                     tabIndex="-1"
                     role="menuitem"
                     class="text-gray-600 hover:text-gray-900 flex w-full cursor-pointer select-none items-center gap-2 rounded-md px-3 pt-[9px] pb-2 text-start leading-tight outline-none transition-all hover:bg-blue-gray-50 hover:bg-opacity-80 hover:text-blue-gray-900 focus:bg-blue-gray-50 focus:bg-opacity-80 focus:text-blue-gray-900 active:bg-blue-gray-50 active:bg-opacity-80 active:text-blue-gray-900"
-                    @click="closeProfileMenu(); redirectToProfile()"
+                    @click="closeProfileMenu(); redirectToUserInfo('articles')"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
