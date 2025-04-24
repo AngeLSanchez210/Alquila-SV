@@ -100,6 +100,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/api/articulos/{articulo}/imagenes', [ArticuloController::class, 'subirImagenes']);
     Route::get('/api/favoritos', [FavoritoController::class, 'index'])->name('api.favoritos');
     Route::delete('/favoritos/{favorito}', [FavoritoController::class, 'destroy'])->name('favoritos.destroy');
+    Route::get('/pay', function () {
+        return Inertia::render('Pay');
+    })->name('pay');
 });
 
 Route::post('/puntuaciones', [PuntuacionController::class, 'store'])->name('puntuaciones.store');
@@ -127,14 +130,7 @@ Route::put('/planes/{plan}', [PlanController::class, 'update'])->name('planes.up
 Route::delete('/planes/{plan}', [PlanController::class, 'destroy'])->name('planes.destroy');
 
 // Ruta para obtener los planes en formato JSON
-Route::get('/api/planes', function () {
-    try {
-        $planes = Plan::all(); // Obtén todos los planes desde la base de datos
-        return response()->json($planes);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500); // Devuelve el error en caso de fallo
-    }
-})->name('api.planes');
+Route::get('/api/planes', [PlanController::class, 'index'])->name('api.planes');
 
 // Archivos de configuración y autenticación
 require __DIR__.'/settings.php';

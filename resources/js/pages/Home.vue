@@ -2,6 +2,8 @@
 import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
 import { router } from '@inertiajs/vue3';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 
 const irAFiltradosPorCategoria = (categoria) => {
   router.visit('/articulos', {
@@ -10,6 +12,17 @@ const irAFiltradosPorCategoria = (categoria) => {
     preserveScroll: true,
   });
 };
+
+const planes = ref([]);
+
+onMounted(async () => {
+  try {
+    const response = await axios.get('/api/planes');
+    planes.value = response.data;
+  } catch (error) {
+    console.error('Error al cargar los planes:', error);
+  }
+});
 </script>
 
 <template>
@@ -71,48 +84,48 @@ const irAFiltradosPorCategoria = (categoria) => {
       </div>
 
       <!-- Featured Categories Section -->
-  <div class="bg-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl py-16 sm:py-24 lg:max-w-none lg:py-25">
-        <h2 class="text-2xl font-bold text-gray-900">Alquila por categorías</h2>
+      <div class="bg-white">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div class="mx-auto max-w-2xl py-16 sm:py-24 lg:max-w-none lg:py-25">
+            <h2 class="text-2xl font-bold text-gray-900">Alquila por categorías</h2>
 
-        <div class="mt-6 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:space-y-0">
-          <div class="group relative">
-            <a :href="`/articulos?categoria=${encodeURIComponent('Herramientas')}`">
-              <img src="https://images.unsplash.com/photo-1581244277943-fe4a9c777189?ixlib=rb-4.0.3&auto=format&fit=crop&w=1771&q=80" alt="Herramientas" class="w-full rounded-lg object-cover group-hover:opacity-75 max-sm:h-80 sm:aspect-2/1 lg:aspect-square">
-              <h3 class="mt-6 text-sm text-gray-500">Herramientas</h3>
-              <p class="text-base font-semibold text-gray-900">Todo para construcción y reparaciones</p>
-            </a>
-          </div>
+            <div class="mt-6 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:space-y-0">
+              <div class="group relative">
+                <a :href="`/articulos?categoria=${encodeURIComponent('Herramientas')}`">
+                  <img src="https://images.unsplash.com/photo-1581244277943-fe4a9c777189?ixlib=rb-4.0.3&auto=format&fit=crop&w=1771&q=80" alt="Herramientas" class="w-full rounded-lg object-cover group-hover:opacity-75 max-sm:h-80 sm:aspect-2/1 lg:aspect-square">
+                  <h3 class="mt-6 text-sm text-gray-500">Herramientas</h3>
+                  <p class="text-base font-semibold text-gray-900">Todo para construcción y reparaciones</p>
+                </a>
+              </div>
 
-          <div class="group relative">
-            <a :href="`/articulos?categoria=${encodeURIComponent('Equipos para eventos')}`">
-              <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80" alt="Eventos" class="w-full rounded-lg object-cover group-hover:opacity-75 max-sm:h-80 sm:aspect-2/1 lg:aspect-square">
-              <h3 class="mt-6 text-sm text-gray-500">Equipos para eventos</h3>
-              <p class="text-base font-semibold text-gray-900">Sonido, iluminación y más</p>
-            </a>
-          </div>
+              <div class="group relative">
+                <a :href="`/articulos?categoria=${encodeURIComponent('Equipos para eventos')}`">
+                  <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80" alt="Eventos" class="w-full rounded-lg object-cover group-hover:opacity-75 max-sm:h-80 sm:aspect-2/1 lg:aspect-square">
+                  <h3 class="mt-6 text-sm text-gray-500">Equipos para eventos</h3>
+                  <p class="text-base font-semibold text-gray-900">Sonido, iluminación y más</p>
+                </a>
+              </div>
 
-          <div class="group relative">
-              <a :href="`/articulos?categoria=${encodeURIComponent('Muebles')}`">
-                <img 
-                  src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80" 
-                  alt="Muebles para el hogar y eventos" 
-                  class="w-full rounded-lg object-cover group-hover:opacity-75 max-sm:h-80 sm:aspect-2/1 lg:aspect-square"
-                >
-                <h3 class="mt-6 text-sm text-gray-500">Muebles</h3>
-                <p class="text-base font-semibold text-gray-900">Para el hogar, oficina o eventos</p>
-              </a>
+              <div class="group relative">
+                <a :href="`/articulos?categoria=${encodeURIComponent('Muebles')}`">
+                  <img 
+                    src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80" 
+                    alt="Muebles para el hogar y eventos" 
+                    class="w-full rounded-lg object-cover group-hover:opacity-75 max-sm:h-80 sm:aspect-2/1 lg:aspect-square"
+                  >
+                  <h3 class="mt-6 text-sm text-gray-500">Muebles</h3>
+                  <p class="text-base font-semibold text-gray-900">Para el hogar, oficina o eventos</p>
+                </a>
+              </div>
+
             </div>
-
+          </div>
         </div>
       </div>
-    </div>
-  </div>
     </main>
 
-     <!-- Benefits Section -->
-     <section class="text-gray-600 body-font bg-white mt-1">
+    <!-- Benefits Section -->
+    <section class="text-gray-600 body-font bg-white mt-1">
       <div class="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center">
         <div class="lg:flex-grow md:w-1/2 lg:pr-24 md:pr-16 flex flex-col md:items-start md:text-left mb-16 md:mb-0 items-center text-center">
           <h1 class="mt-2 text-5xl font-semibold tracking-tight text-balance text-gray-900 sm:text-6xl">Regístrate ahora
@@ -120,21 +133,20 @@ const irAFiltradosPorCategoria = (categoria) => {
           </h1>
           <p class="mb-8 mt-3 leading-relaxed">Accede a nuestro catálogo completo de productos para alquilar, recibe recomendaciones personalizadas según tus necesidades y obtén descuentos exclusivos en tus primeros alquileres. Ahorra dinero alquilando en lugar de comprar equipo que usarás pocas veces.</p>
           <div class="flex justify-center gap-4">
-                <button
-                  @click="$inertia.visit(route('register'))"
-                  class="inline-flex items-center justify-center text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg transition"
-                >
-                  Registrarse
-                </button>
+            <button
+              @click="$inertia.visit(route('register'))"
+              class="inline-flex items-center justify-center text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg transition"
+            >
+              Registrarse
+            </button>
 
-                <a
-                  href="/articulos"
-                  class="inline-flex items-center justify-center text-white bg-indigo-600 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-700 rounded text-lg transition"
-                >
-                  Ver catálogo
-                </a>
-              </div>
-
+            <a
+              href="/articulos"
+              class="inline-flex items-center justify-center text-white bg-indigo-600 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-700 rounded text-lg transition"
+            >
+              Ver catálogo
+            </a>
+          </div>
         </div>
         <div class="lg:max-w-lg lg:w-full md:w-1/2 w-5/6">
           <img class="object-cover object-center rounded" alt="Persona feliz alquilando equipo" src="https://images.unsplash.com/photo-1560438718-eb61ede255eb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80">
@@ -154,124 +166,80 @@ const irAFiltradosPorCategoria = (categoria) => {
       <p class="mx-auto mt-6 max-w-2xl text-center text-lg font-medium text-pretty text-gray-700 sm:text-xl/8">Nuestros planes de membresía ofrecen beneficios exclusivos, descuentos y prioridad en reservas. Encuentra la opción ideal para tus necesidades de alquiler.</p>
       
       <div class="mx-auto mt-16 grid max-w-lg grid-cols-1 items-center gap-y-6 sm:mt-20 sm:gap-y-8 lg:max-w-5xl lg:grid-cols-3">
-        <div class="relative rounded-3xl bg-white p-8 ring-1 ring-gray-900/10">
-          <h3 id="tier-basic" class="text-base/7 font-semibold text-indigo-600">Básico</h3>
+        <div
+          v-for="(plan, index) in planes"
+          :key="plan.id"
+          :class="[
+            'relative rounded-3xl p-8 ring-1',
+            plan.precio === Math.max(...planes.map(p => p.precio))
+              ? 'bg-gray-900 text-gray-300 shadow-2xl ring-gray-900/10'
+              : 'bg-white text-gray-600 ring-gray-900/10',
+          ]"
+        >
+          <h3
+            :id="`tier-${plan.nombre.toLowerCase()}`"
+            :class="plan.precio === Math.max(...planes.map(p => p.precio)) ? 'text-indigo-400' : 'text-indigo-600'"
+          >
+            {{ plan.nombre }}
+          </h3>
           <p class="mt-4 flex items-baseline gap-x-2">
-            <span class="text-5xl font-semibold tracking-tight text-gray-900">$19</span>
-            <span class="text-base text-gray-500">/mes</span>
+            <span
+              :class="plan.precio === Math.max(...planes.map(p => p.precio)) ? 'text-white' : 'text-gray-900'"
+              class="text-5xl font-semibold tracking-tight"
+            >
+              ${{ plan.precio }}
+            </span>
+            <span
+              :class="plan.precio === Math.max(...planes.map(p => p.precio)) ? 'text-gray-400' : 'text-gray-500'"
+              class="text-base"
+            >
+              /mes
+            </span>
           </p>
-          <p class="mt-6 text-base/7 text-gray-600">Perfecto para quienes necesitan alquilar ocasionalmente.</p>
-          <ul role="list" class="mt-8 space-y-3 text-sm/6 text-gray-600 sm:mt-10">
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+          <!-- Mostrar solo el primer texto antes de la coma -->
+          <p
+            class="mt-6 text-base/7"
+            :class="plan.precio === Math.max(...planes.map(p => p.precio)) ? 'text-gray-300' : 'text-gray-600'"
+          >
+            {{ plan.descripcion.split(',')[0] }}
+          </p>
+          <!-- Listar los demás elementos después de la coma -->
+          <ul
+            role="list"
+            class="mt-8 space-y-3 text-sm/6"
+            :class="plan.precio === Math.max(...planes.map(p => p.precio)) ? 'text-gray-300' : 'text-gray-600'"
+          >
+            <li
+              v-for="(item, i) in plan.descripcion.split(',').slice(1)"
+              :key="i"
+              class="flex gap-x-3"
+            >
+              <svg
+                :class="plan.precio === Math.max(...planes.map(p => p.precio)) ? 'text-indigo-400' : 'text-indigo-600'"
+                class="h-6 w-5 flex-none"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+                  clip-rule="evenodd"
+                />
               </svg>
-              Hasta 3 alquileres al mes
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              5% de descuento en todos los alquileres
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              Soporte por email
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              Tiempo de respuesta en 24 horas
+              {{ item }}
             </li>
           </ul>
-          <a href="#" aria-describedby="tier-basic" class="mt-8 block rounded-md px-3.5 py-2.5 text-center text-sm font-semibold text-indigo-600 ring-1 ring-indigo-200 ring-inset hover:ring-indigo-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:mt-10">Comenzar ahora</a>
-        </div>
-
-        <div class="ml-2 relative rounded-3xl bg-white p-8 ring-1 ring-gray-900/10">
-          <h3 id="tier-premium" class="text-base/7 font-semibold text-indigo-600">Premium</h3>
-          <p class="mt-4 flex items-baseline gap-x-2">
-            <span class="text-5xl font-semibold tracking-tight text-gray-900">$49</span>
-            <span class="text-base text-gray-500">/mes</span>
-          </p>
-          <p class="mt-6 text-base/7 text-gray-600">Para usuarios frecuentes que necesitan más flexibilidad.</p>
-          <ul role="list" class="mt-8 space-y-3 text-sm/6 text-gray-600 sm:mt-10">
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              Hasta 10 alquileres al mes
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              15% de descuento en todos los alquileres
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              Soporte prioritario
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              Tiempo de respuesta en 12 horas
-            </li>
-          </ul>
-          <a href="#" aria-describedby="tier-premium" class="mt-8 block rounded-md px-3.5 py-2.5 text-center text-sm font-semibold text-indigo-600 ring-1 ring-indigo-200 ring-inset hover:ring-indigo-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:mt-10">Comenzar ahora</a>
-        </div>
-
-        <div class="ml-2 relative rounded-3xl bg-gray-900 p-8 ring-1 shadow-2xl ring-gray-900/10 sm:p-10">
-          <h3 id="tier-empresarial" class="text-base/7 font-semibold text-indigo-400">Empresarial</h3>
-          <p class="mt-4 flex items-baseline gap-x-2">
-            <span class="text-5xl font-semibold tracking-tight text-white">$99</span>
-            <span class="text-base text-gray-400">/mes</span>
-          </p>
-          <p class="mt-6 text-base/7 text-gray-300">Solución completa para empresas y proyectos grandes.</p>
-          <ul role="list" class="mt-8 space-y-3 text-sm/6 text-gray-300 sm:mt-10">
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              Alquileres ilimitados
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              25% de descuento en todos los alquileres
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              Asesor personal dedicado
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              Tiempo de respuesta en 1 hora
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              Entrega y recogida incluidas
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-              </svg>
-              Facturación personalizada
-            </li>
-          </ul>
-          <a href="#" aria-describedby="tier-empresarial" class="mt-8 block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:mt-10">Contactar ventas</a>
+          <a
+            href="#"
+            :aria-describedby="`tier-${plan.nombre.toLowerCase()}`"
+            class="mt-8 block rounded-md px-3.5 py-2.5 text-center text-sm font-semibold"
+            :class="plan.precio === Math.max(...planes.map(p => p.precio))
+              ? 'bg-indigo-500 text-white hover:bg-indigo-400 focus-visible:outline-indigo-500'
+              : 'text-indigo-600 ring-1 ring-indigo-200 ring-inset hover:ring-indigo-300 focus-visible:outline-indigo-600'"
+          >
+            {{ plan.precio === Math.max(...planes.map(p => p.precio)) ? 'Contactar ventas' : 'Comenzar ahora' }}
+          </a>
         </div>
       </div>
     </div>  

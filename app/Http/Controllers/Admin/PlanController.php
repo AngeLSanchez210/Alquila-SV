@@ -9,12 +9,8 @@ use Inertia\Response;
 
 class PlanController extends Controller
 {
-    public function index(): Response
+    public function index()
     {
-        $planes = Plan::all(); // Obtén todos los planes desde la base de datos
-
-        return Inertia::render('admin/Planes', [
-            'planes' => $planes, // Pasa los planes a la vista
-        ]);
+        return response()->json(Plan::all());
     }
 }

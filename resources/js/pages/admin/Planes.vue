@@ -84,7 +84,7 @@ const openCreateModal = async () => {
       const precio = parseFloat((document.getElementById('swal-precio') as HTMLInputElement).value);
       const destacar = (document.getElementById('swal-destacar') as HTMLInputElement).checked;
 
-      if (!nombre || !duracion || !maxPublicaciones || !precio) {
+      if (!nombre || !duracion || !maxPublicaciones) {
         Swal.showValidationMessage('Por favor, completa todos los campos obligatorios.');
         return null;
       }
@@ -140,7 +140,7 @@ const openEditModal = async (plan: Plan) => {
       const precio = parseFloat((document.getElementById('swal-precio') as HTMLInputElement).value);
       const destacar = (document.getElementById('swal-destacar') as HTMLInputElement).checked;
 
-      if (!nombre || !duracion || !maxPublicaciones || !precio) {
+      if (!nombre || !duracion || !maxPublicaciones) {
         Swal.showValidationMessage('Por favor, completa todos los campos obligatorios.');
         return null;
       }

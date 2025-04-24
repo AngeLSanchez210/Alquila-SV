@@ -22,7 +22,7 @@ class PlanController extends Controller
         $data = $request->validate([
             'nombre' => 'required|string|unique:planes_alquila,nombre',
             'descripcion' => 'nullable|string',
-            'duracion' => 'required|integer|min:1', // Asegúrate de que la duración sea un número positivo
+            'duracion' => 'required|integer|min:0', // Asegúrate de que la duración sea un número positivo
             'max_publicaciones' => 'required|integer|min:1', // Asegúrate de que sea un número positivo
             'destacar' => 'required|boolean',
             'precio' => 'required|numeric|min:0', // Asegúrate de que el precio sea un número positivo
@@ -38,7 +38,7 @@ class PlanController extends Controller
         $data = $request->validate([
             'nombre' => 'sometimes|string|unique:planes_alquila,nombre,' . $plan->id,
             'descripcion' => 'sometimes|nullable|string', // Agrega la descripción
-            'duracion' => 'sometimes|integer|min:1', // Agrega la duración
+            'duracion' => 'sometimes|integer|min:0', // Agrega la duración
             'max_publicaciones' => 'sometimes|integer|min:1', // Agrega el máximo de publicaciones
             'destacar' => 'sometimes|boolean',
             'precio' => 'sometimes|numeric|min:0',
