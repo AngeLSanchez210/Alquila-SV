@@ -16,9 +16,7 @@ class Suscripcion extends Model
         parent::boot();
 
         static::creating(function ($suscripcion) {
-            if (!$suscripcion->fecha_fin) {
-                $suscripcion->fecha_fin = $suscripcion->fecha_inicio->copy()->addDays(30);
-            }
+            // Eliminado el cálculo de fecha_fin
         });
     }
 

@@ -37,4 +37,14 @@ export interface User {
     avatar?: string;
 }
 
+export interface Plan {
+    id: number;
+    nombre: string;
+    descripcion?: string;
+    duracion: number;
+    max_publicaciones: number;
+    precio: number;
+    destacar: boolean;
+}
+
 export type BreadcrumbItemType = BreadcrumbItem;

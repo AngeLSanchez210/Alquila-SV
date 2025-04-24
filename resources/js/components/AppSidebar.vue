@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3'; // Usamos Link de Inertia.js
-import { Users, Box, Settings } from 'lucide-vue-next';
+import { Users, Box, Settings, Tickets } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 // Menú principal
@@ -32,6 +32,11 @@ const mainNavItems: NavItem[] = [
     title: 'Configuración',
     href: '/admin/settings',
     icon: Settings,
+  },
+  {
+    title: 'Planes',
+    href: '/planes',
+    icon: Tickets,
   },
 ];
 </script>

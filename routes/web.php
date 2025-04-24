@@ -7,7 +7,9 @@ use App\Http\Controllers\ArticuloController;
 use App\Http\Controllers\FavoritoController;
 use App\Http\Controllers\PuntuacionController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\PlanController;
 use App\Http\Middleware\Denegade;
+use App\Models\Plan;
 
 
 // Ruta de inicio
@@ -109,6 +111,30 @@ Route::get('/articulos/ver/{articulo}', [ArticuloController::class, 'ver'])->nam
 
 
 Route::get('/categorias', [CategoriaController::class, 'index']);
+
+// Ruta para la vista de los planes
+Route::get('/planes', function () {
+    return inertia::render('admin/Planes');
+})->name('planes');
+
+// Ruta para crear un nuevo plan
+Route::post('/planes', [PlanController::class, 'store'])->name('planes.store');
+
+// Ruta para actualizar un plan
+Route::put('/planes/{plan}', [PlanController::class, 'update'])->name('planes.update');
+
+// Ruta para eliminar un plan
+Route::delete('/planes/{plan}', [PlanController::class, 'destroy'])->name('planes.destroy');
+
+// Ruta para obtener los planes en formato JSON
+Route::get('/api/planes', function () {
+    try {
+        $planes = Plan::all(); // Obtén todos los planes desde la base de datos
+        return response()->json($planes);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500); // Devuelve el error en caso de fallo
+    }
+})->name('api.planes');
 
 // Archivos de configuración y autenticación
 require __DIR__.'/settings.php';

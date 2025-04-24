@@ -11,5 +11,12 @@ class Plan extends Model
 
     protected $table = 'planes_alquila'; // Nombre de la tabla en la base de datos
 
-    protected $fillable = ['nombre', 'max_publicaciones', 'destacar', 'precio', 'beneficios']; // Se agrega 'beneficios'
+    protected $fillable = [
+        'nombre',
+        'descripcion',
+        'duracion',
+        'max_publicaciones',
+        'precio',
+        'destacar',
+    ];
 }

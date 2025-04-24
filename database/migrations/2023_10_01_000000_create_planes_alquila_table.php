@@ -11,6 +11,8 @@ class CreatePlanesAlquilaTable extends Migration
         Schema::create('planes_alquila', function (Blueprint $table) {
             $table->id();
             $table->string('nombre')->unique();
+            $table->string('descripcion')->nullable();
+            $table->integer('duracion'); // Duración en días
             $table->integer('max_publicaciones');
             $table->boolean('destacar');
             $table->decimal('precio', 8, 2);
