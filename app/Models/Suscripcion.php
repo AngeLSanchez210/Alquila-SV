@@ -9,34 +9,22 @@ class Suscripcion extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['usuario_id', 'fecha_inicio', 'fecha_fin', 'estado', 'plan'];
+    protected $table = 'suscripciones';
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($suscripcion) {
-            // Eliminado el cálculo de fecha_fin
-        });
-    }
+    protected $fillable = ['usuario_id', 'fecha_inicio', 'fecha_fin', 'estado', 'plan_id', 'pago_id'];
 
     public function usuario()
     {
-        return $this->belongsTo(User::class);
-    }
-
-    public function articulo()
-    {
-        return $this->belongsTo(Articulo::class);
+        return $this->belongsTo(User::class, 'usuario_id');
     }
 
     public function plan()
     {
-        return $this->belongsTo(Plan::class);
+        return $this->belongsTo(Plan::class, 'plan_id');
     }
 
     public function pago()
     {
-        return $this->belongsTo(Pago::class);
+        return $this->belongsTo(Pago::class, 'pago_id');
     }
 }

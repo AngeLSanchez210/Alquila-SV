@@ -134,11 +134,14 @@ const pagarConPaypal = async () => {
     });
     Swal.fire('Pago Exitoso', 'Tu pago se ha procesado correctamente.', 'success');
   } catch (error) {
-    if (error.response?.status === 400) {
-      Swal.fire('Error', error.response.data.error, 'error'); // Mostrar mensaje del backend
-    } else {
-      Swal.fire('Error', 'Error al procesar el pago.', 'error');
-    }
+  if (error.response?.status === 400) {
+    Swal.fire('Error', error.response.data.error, 'error'); // Mostrar mensaje del backend
+  } else if (error.response?.status === 500) {
+    Swal.fire('Error Interno', `${error.response.data.error} (Línea: ${error.response.data.line})`, 'error'); 
+  } else {
+    Swal.fire('Error', 'Error desconocido al procesar el pago.', 'error');
+  }
+  
   }
 };
 
@@ -156,11 +159,15 @@ const pagarConTarjeta = async () => {
     });
     Swal.fire('Pago Exitoso', 'Tu pago se ha procesado correctamente.', 'success');
   } catch (error) {
-    if (error.response?.status === 400) {
-      Swal.fire('Error', error.response.data.error, 'error'); // Mostrar mensaje del backend
-    } else {
-      Swal.fire('Error', 'Error al procesar el pago.', 'error');
-    }
+  if (error.response?.status === 400) {
+    Swal.fire('Error', error.response.data.error, 'error'); // Mostrar mensaje del backend
+  } else if (error.response?.status === 500) {
+    Swal.fire('Error Interno', `${error.response.data.error} (Línea: ${error.response.data.line})`, 'error'); 
+  } else {
+    Swal.fire('Error', 'Error desconocido al procesar el pago.', 'error');
   }
+  }
+
+  
 };
 </script>
