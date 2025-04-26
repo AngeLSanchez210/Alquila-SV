@@ -9,12 +9,16 @@ class Pago extends Model
 {
     use HasFactory;
 
+    protected $table = 'pagos'; // Especificar el nombre correcto de la tabla
+
     protected $fillable = [
         'metodo',
         'monto',
         'estado',
         'transaccion_id',
         'fecha_pago',
+        'user_id',
+        'plan_id',
     ];
 
     public function suscripcion()

@@ -9,7 +9,7 @@ class Plan extends Model
 {
     use HasFactory;
 
-    protected $table = 'planes_alquila'; // Nombre de la tabla en la base de datos
+    protected $table = 'planes_alquila'; // Especificar el nombre correcto de la tabla
 
     protected $fillable = [
         'nombre',

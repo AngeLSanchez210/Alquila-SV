@@ -231,7 +231,8 @@ onMounted(async () => {
             </li>
           </ul>
           <a
-            href="#"
+            v-if="plan.precio > 0"
+            :href="`/pay?plan_id=${plan.id}`"
             :aria-describedby="`tier-${plan.nombre.toLowerCase()}`"
             class="mt-8 block rounded-md px-3.5 py-2.5 text-center text-sm font-semibold"
             :class="plan.precio === Math.max(...planes.map(p => p.precio))

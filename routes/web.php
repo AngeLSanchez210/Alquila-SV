@@ -10,7 +10,7 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\PlanController;
 use App\Http\Middleware\Denegade;
 use App\Models\Plan;
-
+use App\Http\Controllers\PagoController;
 
 // Ruta de inicio
 Route::get('/', function () {
@@ -103,6 +103,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pay', function () {
         return Inertia::render('Pay');
     })->name('pay');
+});
+
+// Ruta para almacenar un pago (solo para usuarios autenticados)
+Route::middleware(['auth'])->group(function () {
+    Route::post('/pagos', [PagoController::class, 'store'])->name('pagos.store');
 });
 
 Route::post('/puntuaciones', [PuntuacionController::class, 'store'])->name('puntuaciones.store');
