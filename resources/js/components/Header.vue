@@ -109,11 +109,12 @@ const menuItems = [
 
           <!-- Logo -->
           <div class="ml-2 flex lg:ml-0">
-            <a href="#">
-              <span class="sr-only">Your Company</span>
-              <img class="h-8 w-auto" src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="">
+            <a href="/">
+              <span class="sr-only">Alquila SV</span>
+              <img class="h-28 w-auto object-cover" src="/img/logofinal.png" alt="Alquila SV Logo">
             </a>
           </div>
+
 
           <!-- Unified menu -->
           <div
