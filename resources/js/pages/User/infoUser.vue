@@ -9,6 +9,13 @@ import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
 import { objectPick } from '@vueuse/core';
 
+
+import { router } from '@inertiajs/vue3'; // Asegúrate de importar router
+const verArticulo = (id: number) => {
+  router.visit(`/articulos/ver/${id}`);
+};
+
+
 const props = defineProps<{ user: User }>();
 
 const activeSection = ref('info'); // Estado para controlar la sección activa
@@ -294,7 +301,13 @@ const redirectToCreateArticulo = () => {
           </div>
           <ul class="space-y-4">
             <li v-for="articulo in articulos" :key="articulo.id" class="border-b pb-4 flex items-center gap-4">
-              <img :src="'/storage/' + articulo.imagenes[0]?.link" alt="Imagen del artículo" class="w-24 h-24 object-cover rounded">
+              <img
+                    @click="verArticulo(articulo.id)"
+                    :src="'/storage/' + articulo.imagenes[0]?.link"
+                    alt="Imagen del artículo"
+                    class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition"
+                  />
+   
               <div class="flex-1">
                 <h3 class="text-lg font-medium text-gray-900">{{ articulo.nombre }}</h3>
                 <p class="text-sm text-gray-600">{{ articulo.descripcion }}</p>
@@ -360,13 +373,14 @@ const redirectToCreateArticulo = () => {
               :key="favorito.id"
               class="border-b pb-4 flex items-center gap-4"
             >
-              <img 
-                :src="favorito.articulo.imagenes && favorito.articulo.imagenes.length > 0 
-                  ? '/storage/' + favorito.articulo.imagenes[0].link 
-                  : '/images/default-placeholder.png'" 
-                alt="Imagen del artículo" 
-                class="w-24 h-24 object-cover rounded"
-              >
+            <img
+        @click="verArticulo(favorito.articulo.id)"
+        :src="favorito.articulo.imagenes && favorito.articulo.imagenes.length > 0 
+          ? '/storage/' + favorito.articulo.imagenes[0].link 
+          : '/images/default-placeholder.png'"
+        alt="Imagen del artículo"
+        class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition"
+      >
               <div class="flex-1">
                 <h3 class="text-lg font-medium text-gray-900">{{ favorito.articulo.nombre }}</h3>
                 <p class="text-sm text-gray-600">{{ favorito.articulo.descripcion }}</p>

@@ -247,101 +247,102 @@ const limpiarFiltros = () => {
   </section>
 
   <!-- Modal Detalles -->
-  <div v-if="mostrarModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center p-6 border-b">
-        <h2 class="text-2xl font-bold text-gray-900">{{ articuloSeleccionado?.nombre }}</h2>
-        <button @click="cerrarModal" class="text-gray-500 hover:text-gray-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+<div v-if="mostrarModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+    <!-- Header del modal -->
+    <div class="flex justify-between items-center px-6 py-4 border-b">
+      <h2 class="text-3xl font-bold text-gray-800">{{ articuloSeleccionado?.nombre }}</h2>
+      <button @click="cerrarModal" class="text-gray-400 hover:text-gray-600 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Contenido del modal -->
+    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Imágenes -->
+      <div class="rounded-2xl overflow-hidden shadow-md">
+        <swiper :modules="[Navigation, Pagination]" navigation pagination>
+          <swiper-slide v-for="imagen in articuloSeleccionado.imagenes" :key="imagen.id">
+            <img
+              :src="imagen.link ? `/storage/${imagen.link}` : 'https://via.placeholder.com/600x400'"
+              :alt="articuloSeleccionado.nombre"
+              class="w-full h-[400px] object-cover"
+            />
+          </swiper-slide>
+        </swiper>
       </div>
 
-      <div class="p-6">
-        <div v-if="articuloSeleccionado" class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Imágenes -->
-          <div class="overflow-hidden rounded-lg">
-            <swiper :modules="[Navigation, Pagination]" navigation pagination class="rounded-md shadow-lg">
-              <swiper-slide v-for="imagen in articuloSeleccionado.imagenes" :key="imagen.id">
-                <img
-                  :src="imagen.link ? `/storage/${imagen.link}` : 'https://via.placeholder.com/500'"
-                  :alt="articuloSeleccionado.nombre"
-                  class="w-full h-96 object-cover"
-                />
-              </swiper-slide>
-            </swiper>
+      <!-- Info -->
+      <div class="flex flex-col justify-between">
+        <div class="space-y-4">
+          <p class="text-3xl font-bold text-indigo-600">${{ articuloSeleccionado.precio }}</p>
+          <p class="text-gray-700 text-lg leading-relaxed">{{ articuloSeleccionado.descripcion }}</p>
+
+          <div class="mt-4 border-t pt-4 text-sm text-gray-600 space-y-2">
+            <p><strong>Categoría:</strong> {{ articuloSeleccionado.categoria?.nombre || 'Sin categoría' }}</p>
+            <p><strong>Estado:</strong> {{ articuloSeleccionado.estado }}</p>
+            <p><strong>Publicado por:</strong> {{ articuloSeleccionado.usuario?.name || 'Desconocido' }}</p>
+            <p><strong>Fecha de publicación:</strong> {{ new Date(articuloSeleccionado.created_at).toLocaleString() }}</p>
           </div>
 
-          <!-- Info -->
-          <div class="space-y-6">
-            <p class="text-2xl font-semibold text-gray-900">${{ articuloSeleccionado.precio }}</p>
-            <p class="text-gray-700">{{ articuloSeleccionado.descripcion }}</p>
-            <div class="border-t border-gray-200 pt-4 space-y-2">
-              <h3 class="text-lg font-medium text-gray-900">Detalles del producto</h3>
-              <p class="text-black font-medium">Estado: {{ articuloSeleccionado.estado }}</p>
-              <p class="text-black font-medium">Publicado por: {{ articuloSeleccionado.usuario?.name || 'Desconocido' }}</p>
-              <p class="text-black font-medium">Fecha de publicación: {{ new Date(articuloSeleccionado.created_at).toLocaleString() }}</p>
-            </div>
+          <!-- WhatsApp -->
+          <a
+            v-if="articuloSeleccionado.usuario?.telefono"
+            :href="`https://wa.me/503${articuloSeleccionado.usuario.telefono}?text=Hola ${articuloSeleccionado.usuario.name}, estoy interesad@ en tu artículo '${articuloSeleccionado.nombre}'. ¿Me podrías dar más información?`"
+            target="_blank"
+            class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 rounded-xl transition mt-6"
+          >
+            Contactar por WhatsApp
+          </a>
 
-            <!-- Contactar -->
-                  <a
-                    v-if="articuloSeleccionado.usuario?.telefono"
-                    :href="`https://wa.me/503${articuloSeleccionado.usuario.telefono}?text=Hola ${articuloSeleccionado.usuario.name}, estoy interesad@ en tu artículo '${articuloSeleccionado.nombre}'. ¿Me podrías dar más información?`"
-                    target="_blank"
-                    class="mt-4 w-full inline-flex justify-center items-center gap-2 bg-green-500 py-3 px-8 rounded-md font-semibold text-white hover:bg-green-600 transition"
-                  >
-                   Contactar por WhatsApp
-                  </a>
+          <!-- Botón de Favoritos -->
+          <button
+            @click.stop.prevent="agregarAFavoritos"
+            class="w-full mt-2 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2.5 rounded-xl transition"
+          >
+            Agregar a favoritos
+          </button>
+        </div>
 
-
-
-
-
-            <!-- Favoritos -->
-            <button
-              @click.stop.prevent="agregarAFavoritos"
-              class="w-full bg-yellow-400 py-3 px-8 rounded-md font-medium text-black hover:bg-yellow-500 mb-4"
-            >
-              Agregar a favoritos 
-            </button>
-
-            <!-- Puntuación -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Tu puntuación:</label>
-              <div class="flex items-center space-x-1 mt-2">
-                <template v-for="n in 5" :key="n">
-                  <svg
-                    @click="puntuacion = n"
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6 cursor-pointer transition duration-200"
-                    :class="puntuacion >= n ? 'text-yellow-400' : 'text-gray-300'"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.96a1 1 0 00.95.69h4.17c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.96c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.176 0l-3.38 2.455c-.784.57-1.838-.197-1.539-1.118l1.287-3.96a1 1 0 00-.364-1.118L2.055 9.387c-.783-.57-.38-1.81.588-1.81h4.17a1 1 0 00.951-.69l1.285-3.96z" />
-                  </svg>
-                </template>
-              </div>
-            </div>
-
-            <!-- Comentario -->
-            <div>
-              <label for="comentario" class="block text-sm font-medium text-gray-700">Comentario (opcional):</label>
-              <textarea  v-model="comentario" id="comentario" rows="4" class="w-full px-3 py-2 border rounded-md text-sm mt-2 text-gray-700 "></textarea>
-            </div>
-
-            <button
-              @click.stop.prevent="agregarPuntuacion"
-              class="mt-4 w-full bg-indigo-600 py-3 px-8 rounded-md font-medium text-white hover:bg-indigo-700"
-            >
-              Agregar Puntuación
-            </button>
+        <!-- Puntuación -->
+        <div class="mt-8">
+          <h3 class="text-lg font-semibold text-gray-700 mb-2">Tu puntuación:</h3>
+          <div class="flex space-x-1 mb-4">
+            <template v-for="n in 5" :key="n">
+              <svg
+                @click="puntuacion = n"
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-7 w-7 cursor-pointer transition duration-200"
+                :class="puntuacion >= n ? 'text-yellow-400' : 'text-gray-300'"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.96a1 1 0 00.95.69h4.17c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.96c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.176 0l-3.38 2.455c-.784.57-1.838-.197-1.539-1.118l1.287-3.96a1 1 0 00-.364-1.118L2.055 9.387c-.783-.57-.38-1.81.588-1.81h4.17a1 1 0 00.951-.69l1.285-3.96z" />
+              </svg>
+            </template>
           </div>
+
+          <textarea
+            v-model="comentario"
+            rows="3"
+            placeholder="Comentario opcional..."
+            class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none  text-black"
+          ></textarea>
+
+          <button
+            @click.stop.prevent="agregarPuntuacion"
+            class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition"
+          >
+            Agregar Puntuación
+          </button>
         </div>
       </div>
     </div>
   </div>
+</div>
+
 
   <Footer />
 </template>

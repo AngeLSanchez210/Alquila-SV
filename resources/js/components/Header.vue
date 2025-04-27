@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { usePage } from '@inertiajs/vue3';
-import { router } from '@inertiajs/vue3';
+import { usePage, router } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import axios from 'axios';
 
@@ -48,10 +47,10 @@ const closeProfileMenu = () => {
   menu?.classList.add('hidden');
 };
 
-function redirectToUserInfo (section){
+function redirectToUserInfo(section) {
   const userId = props.auth.user.id;
   window.location.href = `/user/${userId}?section=${section}`;
-};
+}
 
 onMounted(() => {
   document.addEventListener('click', (event) => {
@@ -59,12 +58,7 @@ onMounted(() => {
     const mobileToggleButton = document.querySelector('.mobile-menu-toggle');
     const profileMenu = document.getElementById('profile-menu');
     const avatar = document.querySelector('[data-popover-target="profile-menu"]');
-    if (
-      mobileMenu &&
-      mobileToggleButton &&
-      !mobileMenu.contains(event.target) &&
-      !mobileToggleButton.contains(event.target)
-    ) {
+    if (mobileMenu && mobileToggleButton && !mobileMenu.contains(event.target) && !mobileToggleButton.contains(event.target)) {
       closeMobileMenu();
     }
     if (profileMenu && avatar && !profileMenu.contains(event.target) && !avatar.contains(event.target)) {
@@ -80,13 +74,13 @@ const goToArticulo = (id) => {
   router.visit(route('articulos.ver', id));
 };
 
-
-
 const menuItems = [
-  { name: 'Vehículos', href: '#' },
-  { name: 'Herramientas', href: '#' },
-  { name: 'Tecnología', href: '#' },
+  { name: 'Inicio', action: () => router.visit('/') },
+  { name: 'Vehículos', action: () => router.visit('/articulos', { method: 'get', data: { categoria: 'Vehículos' }, preserveScroll: true }) },
+  { name: 'Herramientas', action: () => router.visit('/articulos', { method: 'get', data: { categoria: 'Herramientas' }, preserveScroll: true }) },
+  { name: 'Tecnología', action: () => router.visit('/articulos', { method: 'get', data: { categoria: 'Tecnología' }, preserveScroll: true }) },
 ];
+
 </script>
 
 <template>
@@ -118,20 +112,21 @@ const menuItems = [
 
           <!-- Unified menu -->
           <div
-            :class="{'hidden lg:block lg:self-stretch': !isMobileMenuOpen, ' mobile-menu absolute top-16 left-0 w-full bg-white shadow-lg lg:hidden': isMobileMenuOpen}"
-          >
-            <div :class="isMobileMenuOpen ? 'flex flex-col space-y-4 p-4' : 'flex h-full space-x-8'">
-              <a
-                v-for="item in menuItems"
-                :key="item.name"
-                :href="item.href"
-                class="lg:ml-7 flex items-center text-sm font-medium text-gray-600 hover:text-gray-900"
-                @click="isMobileMenuOpen && closeMobileMenu"
-              >
-                {{ item.name }}
-              </a>
+              :class="{'hidden lg:block lg:self-stretch': !isMobileMenuOpen, ' mobile-menu absolute top-16 left-0 w-full bg-white shadow-lg lg:hidden': isMobileMenuOpen}"
+            >
+              <div :class="isMobileMenuOpen ? 'flex flex-col space-y-4 p-4' : 'flex h-full space-x-8'">
+                <a
+                  v-for="item in menuItems"
+                  :key="item.name"
+                  href="#"
+                  @click.prevent="item.action()"
+                  class="lg:ml-7 flex items-center text-sm font-medium text-gray-600 hover:text-gray-900"
+                >
+                  {{ item.name }}
+                </a>
+              </div>
             </div>
-          </div>
+
 
           <div class="lg:ml-6 flex items-center flex-grow">
             <!-- Search -->
@@ -156,23 +151,24 @@ const menuItems = [
                 v-if="showDropdown && searchResults.length"
                 class="absolute z-50 w-full bg-white shadow-lg rounded-md mt-1 border border-gray-200 max-h-96 overflow-auto"
               >
-                <div
-                  v-for="item in searchResults"
-                  :key="item.id"
-                  @click="goToArticulo(item.id)"
-                  class="flex items-center justify-between p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100"
-                >
-                  <div>
-                    <p class="text-sm font-medium text-gray-800">{{ item.nombre }}</p>
-                    <p class="text-blue-600 font-bold text-sm">${{ parseFloat(item.precio).toFixed(2) }}</p>
-                  </div>
-                  <img
-                    v-if="item.imagenes && item.imagenes.length"
-                    :src="`/storage/${item.imagenes[0].link}`"
-                    class="w-12 h-12 object-cover rounded ml-3"
-                    alt="preview"
-                  />
-                </div>
+              <div
+                      v-for="item in searchResults"
+                      :key="item.id"
+                      @click="goToArticulo(item.id)"
+                      class="flex items-center justify-between p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100"
+                    >
+                      <div class="flex flex-col">
+                        <p class="text-sm font-medium text-gray-800 truncate">{{ item.nombre }}</p>
+                        <p class="text-blue-600 font-bold text-sm">${{ parseFloat(item.precio).toFixed(2) }}</p>
+                      </div>
+                      <img
+                        v-if="item.imagenes && item.imagenes.length"
+                        :src="`/storage/${item.imagenes[0].link}`"
+                        :alt="item.nombre"
+                        class="w-14 h-14 object-cover rounded ml-4 flex-shrink-0"
+                      />
+                    </div>
+
               </div>
             </div>
           </div>

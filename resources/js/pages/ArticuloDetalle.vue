@@ -102,60 +102,63 @@ const agregarPuntuacion = async () => {
 <template>
   <Header />
 
-  <section class="bg-gray-100 min-h-screen px-4 py-12">
-    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-lg grid grid-cols-1 md:grid-cols-2 gap-8">
+  <section class="bg-gray-50 min-h-screen px-6 py-12">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center bg-white p-8 rounded-2xl shadow-xl">
+      
       <!-- Imágenes -->
       <div>
-        <swiper :modules="[Navigation, Pagination]" navigation pagination class="rounded-lg shadow">
+        <swiper :modules="[Navigation, Pagination]" navigation pagination class="rounded-2xl overflow-hidden shadow-md">
           <swiper-slide v-for="img in articulo.imagenes" :key="img.id">
             <img
-              :src="img.link ? `/storage/${img.link}` : 'https://via.placeholder.com/500'"
+              :src="img.link ? `/storage/${img.link}` : 'https://via.placeholder.com/600'"
               :alt="articulo.nombre"
-              class="w-full h-96 object-cover rounded-md"
+              class="w-full h-[400px] object-cover"
             />
           </swiper-slide>
         </swiper>
       </div>
 
       <!-- Información -->
-      <div class="flex flex-col justify-between">
-        <div>
-          <h1 class="text-3xl font-bold mb-2 text-black">{{ articulo.nombre }}</h1>
-          <p class="text-gray-600 mb-4 text-black" >{{ articulo.descripcion }}</p>
-          <p class="text-indigo-600 text-black font-bold text-2xl mb-4">${{ articulo.precio }}</p>
+      <div class="flex flex-col justify-between h-full">
+        <div class="space-y-4">
+          <h1 class="text-4xl font-bold text-gray-900">{{ articulo.nombre }}</h1>
+          <p class="text-gray-600 leading-relaxed">{{ articulo.descripcion }}</p>
+          <p class="text-3xl font-semibold text-indigo-600">${{ articulo.precio }}</p>
 
-          <p class="text-sm font-bold text-black"><strong>Categoría:</strong> {{ articulo.categoria?.nombre || 'Sin categoría' }}</p>
-          <p class="text-sm font-bold text-black"><strong>Publicado por:</strong> {{ articulo.usuario?.name || 'Desconocido' }}</p>
-          <p class="text-sm font-bold  text-black"><strong>Publicado el:</strong> {{ new Date(articulo.created_at).toLocaleString() }}</p>
-        </div>
+          <div class="mt-4 space-y-2 text-gray-700 text-sm">
+            <p><strong>Categoría:</strong> {{ articulo.categoria?.nombre || 'Sin categoría' }}</p>
+            <p><strong>Publicado por:</strong> {{ articulo.usuario?.name || 'Desconocido' }}</p>
+            <p><strong>Publicado el:</strong> {{ new Date(articulo.created_at).toLocaleString() }}</p>
+          </div>
 
-        <!-- Contactar por WhatsApp -->
-              <a
-                v-if="articulo.usuario?.telefono && articulo.usuario.telefono.length === 8"
-                :href="`https://wa.me/503${articulo.usuario.telefono}?text=Hola ${articulo.usuario.name}, estoy interesad@ en tu artículo '${articulo.nombre}'. ¿Me podrías dar más información?`"
-                target="_blank"
-                class="w-full inline-flex justify-center items-center gap-2 bg-green-500 py-2 px-4 rounded font-medium text-white hover:bg-green-600 transition"
-              >
-                Contactar por WhatsApp
-              </a>
+          <!-- WhatsApp Contact -->
+          <a
+            v-if="articulo.usuario?.telefono && articulo.usuario.telefono.length === 8"
+            :href="`https://wa.me/503${articulo.usuario.telefono}?text=Hola ${articulo.usuario.name}, estoy interesad@ en tu artículo '${articulo.nombre}'. ¿Me podrías dar más información?`"
+            target="_blank"
+            class="inline-block w-full text-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-xl transition duration-300"
+          >
+            Contactar por WhatsApp
+          </a>
 
-
-        <div class="space-y-3 mt-6">
-          <button @click="agregarAFavoritos" class="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-500">
-            Agregar a favoritos 
+          <!-- Favoritos -->
+          <button
+            @click="agregarAFavoritos"
+            class="w-full mt-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-2 rounded-xl transition duration-300"
+          >
+            Agregar a favoritos
           </button>
-         
         </div>
 
         <!-- Puntuación -->
         <div class="mt-6">
-          <label class="text-sm font-semibold">Tu puntuación:</label>
-          <div class="flex space-x-1 mt-2">
+          <h2 class="text-lg font-semibold text-gray-800 mb-2">Tu puntuación:</h2>
+          <div class="flex space-x-1 mb-4">
             <template v-for="n in 5" :key="n">
               <svg
                 @click="puntuacion = n"
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6 cursor-pointer"
+                class="h-7 w-7 cursor-pointer"
                 :class="puntuacion >= n ? 'text-yellow-400' : 'text-gray-300'"
                 fill="currentColor"
                 viewBox="0 0 20 20"
@@ -165,17 +168,16 @@ const agregarPuntuacion = async () => {
             </template>
           </div>
 
-          <!-- Comentario -->
           <textarea
             v-model="comentario"
             rows="3"
-            class="w-full mt-4 p-2 border border-gray-300 rounded text-sm text-black"
             placeholder="Comentario opcional..."
+            class="w-full p-3 border text-black border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"
           ></textarea>
 
           <button
             @click="agregarPuntuacion"
-            class="mt-3 w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
+            class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-xl transition duration-300"
           >
             Agregar Puntuación
           </button>
@@ -186,3 +188,4 @@ const agregarPuntuacion = async () => {
 
   <Footer />
 </template>
+

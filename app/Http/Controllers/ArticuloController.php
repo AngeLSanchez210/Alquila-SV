@@ -188,7 +188,8 @@ class ArticuloController extends Controller
     {
         $query = $request->input('q');
     
-        $articulos = Articulo::where('nombre', 'like', "%$query%")
+        $articulos = Articulo::with('imagenes')  
+            ->where('nombre', 'like', "%$query%")
             ->orWhere('descripcion', 'like', "%$query%")
             ->orWhereHas('categoria', function ($q) use ($query) {
                 $q->where('nombre', 'like', "%$query%");
@@ -198,6 +199,7 @@ class ArticuloController extends Controller
     
         return response()->json($articulos);
     }
+    
     
     
 public function ver(Articulo $articulo)
