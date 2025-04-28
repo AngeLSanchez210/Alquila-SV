@@ -63,7 +63,21 @@ const fetchArticulos = async () => {
   }
 };
 
-const abrirDetalles = (articulo) => { articuloSeleccionado.value = articulo; mostrarModal.value = true; };
+const abrirDetalles = async (articulo) => {
+  try {
+    const response = await axios.get(`/api/articulos/${articulo.id}`); // Aquí haces el fetch por ID
+    articuloSeleccionado.value = response.data.articulo; // Ahora sí con puntuaciones cargadas
+    mostrarModal.value = true;
+  } catch (error) {
+    console.error('Error al cargar el artículo:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudo cargar el artículo. Inténtalo de nuevo.'
+    });
+  }
+};
+
 const cerrarModal = () => { mostrarModal.value = false; };
 onMounted(() => { fetchArticulos(); });
 axios.defaults.withCredentials = true;
@@ -88,12 +102,31 @@ const agregarPuntuacion = async () => {
     return;
   }
   try {
-    await axios.post('/puntuaciones', {
+    const response = await axios.post('/puntuaciones', {
       articulo_id: articuloSeleccionado.value.id,
       puntuacion: puntuacion.value,
       comentario: comentario.value || "",
     });
+
+  
     Swal.fire({ icon: 'success', title: '¡Puntuación agregada!', text: 'Tu puntuación se ha registrado correctamente.' });
+
+    
+    articuloSeleccionado.value.puntuaciones = [
+      ...articuloSeleccionado.value.puntuaciones, 
+      {
+        id: Date.now(), 
+        puntuacion: puntuacion.value,
+        comentario: comentario.value,
+        usuario: { name: user.name },
+        created_at: new Date().toISOString(), 
+      }
+    ];
+
+    // Limpiar inputs
+    puntuacion.value = 0;
+    comentario.value = '';
+
   } catch (error) {
     if (error.response?.status === 409) {
       Swal.fire({ icon: 'info', title: 'Ya puntuaste este artículo', text: 'Solo puedes puntuar una vez por artículo.' });
@@ -103,6 +136,7 @@ const agregarPuntuacion = async () => {
     }
   }
 };
+
 
 const limpiarFiltros = () => {
   priceInput.value = 1000;
@@ -246,9 +280,10 @@ const limpiarFiltros = () => {
     </div>
   </section>
 
-  <!-- Modal Detalles -->
+ <!-- Modal Detalles -->
 <div v-if="mostrarModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
   <div class="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+    
     <!-- Header del modal -->
     <div class="flex justify-between items-center px-6 py-4 border-b">
       <h2 class="text-3xl font-bold text-gray-800">{{ articuloSeleccionado?.nombre }}</h2>
@@ -261,20 +296,63 @@ const limpiarFiltros = () => {
 
     <!-- Contenido del modal -->
     <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-      <!-- Imágenes -->
-      <div class="rounded-2xl overflow-hidden shadow-md">
-        <swiper :modules="[Navigation, Pagination]" navigation pagination>
-          <swiper-slide v-for="imagen in articuloSeleccionado.imagenes" :key="imagen.id">
-            <img
-              :src="imagen.link ? `/storage/${imagen.link}` : 'https://via.placeholder.com/600x400'"
-              :alt="articuloSeleccionado.nombre"
-              class="w-full h-[400px] object-cover"
-            />
-          </swiper-slide>
-        </swiper>
+      
+      <!-- Columna izquierda (Swiper + Puntuaciones) -->
+      <div class="flex flex-col space-y-6">
+        
+        <!-- Imágenes -->
+        <div class="rounded-2xl overflow-hidden shadow-md">
+          <swiper :modules="[Navigation, Pagination]" navigation pagination>
+            <swiper-slide v-for="imagen in articuloSeleccionado.imagenes" :key="imagen.id">
+              <img
+                :src="imagen.link ? `/storage/${imagen.link}` : 'https://via.placeholder.com/600x400'"
+                :alt="articuloSeleccionado.nombre"
+                class="w-full h-[400px] object-cover"
+              />
+            </swiper-slide>
+          </swiper>
+        </div>
+
+        <!-- Puntuaciones -->
+        <div class="bg-gray-100 p-4 rounded-2xl shadow-inner">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3">Puntuaciones:</h3>
+
+          <div v-if="articuloSeleccionado.puntuaciones && articuloSeleccionado.puntuaciones.length > 0" class="space-y-3">
+            <div 
+              v-for="punt in articuloSeleccionado.puntuaciones" 
+              :key="punt.id" 
+              class="bg-white p-3 rounded-lg shadow-sm"
+            >
+              <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center space-x-2">
+                  <p class="text-sm font-bold text-gray-700">{{ punt.usuario?.name || 'Anónimo' }}</p>
+                  <p class="text-xs text-gray-500">{{ new Date(punt.created_at).toLocaleDateString() }}</p>
+                </div>
+                <div class="flex space-x-1">
+                  <template v-for="n in 5" :key="n">
+                    <svg
+                      v-if="n <= punt.puntuacion"
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4 text-yellow-400"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.96a1 1 0 00.95.69h4.17c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.96c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.176 0l-3.38 2.455c-.784.57-1.838-.197-1.539-1.118l1.287-3.96a1 1 0 00-.364-1.118L2.055 9.387c-.783-.57-.38-1.81.588-1.81h4.17a1 1 0 00.951-.69l1.285-3.96z" />
+                    </svg>
+                  </template>
+                </div>
+              </div>
+              <p class="text-sm text-gray-600">{{ punt.comentario || 'Sin comentario' }}</p>
+            </div>
+          </div>
+
+          <div v-else>
+            <p class="text-sm text-gray-500">Este artículo aún no tiene puntuaciones.</p>
+          </div>
+        </div>
       </div>
 
-      <!-- Info -->
+      <!-- Columna derecha (Información del artículo) -->
       <div class="flex flex-col justify-between">
         <div class="space-y-4">
           <p class="text-3xl font-bold text-indigo-600">${{ articuloSeleccionado.precio }}</p>
@@ -328,7 +406,7 @@ const limpiarFiltros = () => {
             v-model="comentario"
             rows="3"
             placeholder="Comentario opcional..."
-            class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none  text-black"
+            class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none text-black"
           ></textarea>
 
           <button
@@ -342,6 +420,7 @@ const limpiarFiltros = () => {
     </div>
   </div>
 </div>
+
 
 
   <Footer />

@@ -137,6 +137,10 @@ Route::delete('/planes/{plan}', [PlanController::class, 'destroy'])->name('plane
 // Ruta para obtener los planes en formato JSON
 Route::get('/api/planes', [PlanController::class, 'index'])->name('api.planes');
 
+
+Route::get('/api/articulos/{articulo}', [ArticuloController::class, 'show'])->name('api.articulos.show');
+
+
 // Archivos de configuración y autenticación
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

@@ -57,74 +57,76 @@ const deleteArticulo = async (id: number) => {
 
 <template>
   <AppLayout>
-    <div class="p-8 space-y-6">
-      <h1 class="text-3xl font-semibold text-white text-center w-full">PANEL DE ARTÍCULOS</h1>
+    <div class="p-8 bg-gray-100 min-h-screen space-y-8">
+
+      <h1 class="text-4xl font-bold text-gray-800 text-center">Panel de Artículos</h1>
 
       <!-- Búsqueda -->
-      <div class="relative mb-6">
+      <div class="relative max-w-md mx-auto">
+        <input
+          v-model="search"
+          type="search"
+          placeholder="Buscar artículos por nombre..."
+          class="w-full p-3 pl-10 rounded-lg border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-800 placeholder-gray-400"
+        />
         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
-        <input
-          v-model="search"
-          type="search"
-          class="bg-white/5 backdrop-blur-md border border-white/10 text-white placeholder-gray-400 text-sm rounded-lg block w-full pl-10 p-2.5"
-          placeholder="Buscar artículos por nombre..."
-        />
       </div>
 
-      <!-- Tabla de artículos -->
-      <div class="overflow-hidden rounded-xl shadow ring-1 ring-white/10 bg-white/5 backdrop-blur-md">
-        <table class="min-w-full divide-y divide-white/10 text-sm text-white">
-          <thead class="bg-white/10">
-            <tr>
-              <th class="px-6 py-3 text-left font-semibold">ID</th>
-              <th class="px-6 py-3 text-left font-semibold">Nombre</th>
-              <th class="px-6 py-3 text-left font-semibold">Precio</th>
-              <th class="px-6 py-3 text-left font-semibold">Estado</th>
-              <th class="px-6 py-3 text-left font-semibold">Imagen</th>
-              <th class="px-6 py-3 text-left font-semibold">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Muestra los artículos filtrados -->
-            <tr v-for="articulo in articulosFiltrados" :key="articulo.id" class="hover:bg-white/5">
-              <td class="px-6 py-4">{{ articulo.id }}</td>
-              <td class="px-6 py-4">{{ articulo.nombre }}</td>
-              <td class="px-6 py-4">${{ articulo.precio }}</td>
-              <td class="px-6 py-4 capitalize">{{ articulo.estado }}</td>
-              <td class="px-6 py-4">
-                <div class="flex gap-2 mt-2">
-                  <img
-                    v-for="imagen in articulo.imagenes"
-                    :key="imagen.id"
-                    :src="'/storage/' + imagen.ruta"
-                    class="w-24 h-24 object-cover rounded"
-                    alt="Imagen del artículo"
-                  />
-                </div>
-              </td>
-              <td class="px-6 py-4 space-x-2">
-                <button
-                  @click="deleteArticulo(articulo.id)"
-                  class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium"
-                >
-                  Eliminar
-                </button>
-              </td>
-            </tr>
-            <!-- Mensaje cuando no hay artículos -->
-            <tr v-if="articulosFiltrados.length === 0">
-              <td colspan="6" class="text-center py-6 text-gray-400">
-                No hay artículos disponibles{{ search ? ' con esa búsqueda' : '' }}.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Tabla -->
+      <div class="overflow-x-auto">
+        <div class="bg-white rounded-2xl shadow-md p-6">
+          <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left font-bold text-gray-700">ID</th>
+                <th class="px-6 py-3 text-left font-bold text-gray-700">Nombre</th>
+                <th class="px-6 py-3 text-left font-bold text-gray-700">Precio</th>
+                <th class="px-6 py-3 text-left font-bold text-gray-700">Estado</th>
+                <th class="px-6 py-3 text-left font-bold text-gray-700">Imagen</th>
+                <th class="px-6 py-3 text-left font-bold text-gray-700">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr v-for="articulo in articulosFiltrados" :key="articulo.id" class="hover:bg-gray-50 text-black">
+                <td class="px-6 py-4">{{ articulo.id }}</td>
+                <td class="px-6 py-4">{{ articulo.nombre }}</td>
+                <td class="px-6 py-4">${{ articulo.precio.toFixed(2) }}</td>
+                <td class="px-6 py-4 capitalize">{{ articulo.estado }}</td>
+                <td class="px-6 py-4">
+                  <div class="flex gap-2 mt-2 flex-wrap">
+                    <img
+                      v-for="imagen in articulo.imagenes"
+                      :key="imagen.id"
+                      :src="'/storage/' + imagen.ruta"
+                      class="w-20 h-20 object-cover rounded-md shadow-sm"
+                      alt="Imagen del artículo"
+                    />
+                  </div>
+                </td>
+                <td class="px-6 py-4 space-x-2">
+                  <button
+                    @click="deleteArticulo(articulo.id)"
+                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+              <tr v-if="articulosFiltrados.length === 0">
+                <td colspan="6" class="text-center py-6 text-gray-400">
+                  No hay artículos disponibles{{ search ? ' con esa búsqueda' : '' }}.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+
     </div>
   </AppLayout>
 </template>

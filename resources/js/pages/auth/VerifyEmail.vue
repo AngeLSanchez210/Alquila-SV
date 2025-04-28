@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
-import AuthLayout from '@/layouts/AuthLayout.vue';
+import Header from '@/components/Header.vue';
+import Footer from '@/components/Footer.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
 
@@ -17,20 +18,54 @@ const submit = () => {
 </script>
 
 <template>
-    <AuthLayout title="Verify email" description="Please verify your email address by clicking on the link we just emailed to you.">
-        <Head title="Email verification" />
+  <div class="min-h-screen flex flex-col">
+    <Header />
 
+    <!-- Contenido principal -->
+    <main class="flex-1 flex flex-col items-center justify-center bg-white px-4 py-12">
+      
+      <!-- Logo empresa (opcional) -->
+      <div class="mb-8">
+        <img class="h-28 w-auto object-cover" src="/img/logofinal.png" alt="Alquila SV Logo">
+      </div>
+
+      <!-- Tarjeta -->
+      <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl">
+        <Head title="Verificación de correo electrónico" />
+
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Verifica tu correo electrónico</h2>
+        <p class="text-center text-sm text-gray-600 mb-6">
+          Por favor verifica tu dirección de correo electrónico haciendo clic en el enlace que te acabamos de enviar.
+        </p>
+
+        <!-- Mensaje de estado -->
         <div v-if="status === 'verification-link-sent'" class="mb-4 text-center text-sm font-medium text-green-600">
-            A new verification link has been sent to the email address you provided during registration.
+            Se ha enviado un nuevo enlace de verificación al correo electrónico que proporcionaste durante el registro.
         </div>
 
+        <!-- Formulario -->
         <form @submit.prevent="submit" class="space-y-6 text-center">
-            <Button :disabled="form.processing" variant="secondary">
-                <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-                Resend verification email
-            </Button>
+          <Button
+            type="submit"
+            :disabled="form.processing"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition duration-300"
+          >
+            <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin mr-2" />
+            Reenviar correo de verificación
+          </Button>
 
-            <TextLink :href="route('logout')" method="post" as="button" class="mx-auto block text-sm"> Log out </TextLink>
+          <TextLink
+            :href="route('logout')"
+            method="post"
+            as="button"
+            class="text-indigo-600 hover:underline font-semibold mt-4 block"
+          >
+            Cerrar sesión
+          </TextLink>
         </form>
-    </AuthLayout>
+      </div>
+    </main>
+
+    <Footer />
+  </div>
 </template>

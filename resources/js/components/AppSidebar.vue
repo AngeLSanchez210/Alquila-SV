@@ -29,11 +29,6 @@ const mainNavItems: NavItem[] = [
     icon: Box,
   },
   {
-    title: 'Configuración',
-    href: '/admin/settings',
-    icon: Settings,
-  },
-  {
     title: 'Planes',
     href: '/planes',
     icon: Tickets,

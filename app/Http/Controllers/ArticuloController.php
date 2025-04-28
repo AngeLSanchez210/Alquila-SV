@@ -90,14 +90,15 @@ class ArticuloController extends Controller
 
     public function show(Articulo $articulo)
     {
-        $articulo->load('categoria', 'usuario', 'imagenes');
-        
+        $articulo->load('categoria', 'usuario', 'imagenes', 'puntuaciones.usuario');
+    
         $nombreUsuario = $articulo->usuario->name; 
         
         return response()->json([
             'articulo' => $articulo,
             'nombre_usuario' => $nombreUsuario, 
         ]);
+    
     }
 
     public function update(Request $request, Articulo $articulo)
