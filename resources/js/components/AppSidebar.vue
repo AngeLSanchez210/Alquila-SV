@@ -37,13 +37,20 @@ const mainNavItems: NavItem[] = [
 </script>
 
 <template>
-  <Sidebar collapsible="icon" variant="inset">
+  <Sidebar collapsible="icon" variant="inset" class="bg-slate-800 text-white border-r border-slate-700">
     <SidebarHeader>
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" as-child>
             <Link :href="route('dashboard')">
-              <AppLogo />
+              <div class="ml-2 flex items-center gap-3 lg:ml-0">
+                <img
+                  src="/img/logofinal.png"
+                  alt="Alquila SV Logo"
+                  class="h-10 w-auto object-cover" 
+                />
+                <span class="text-xl font-bold tracking-wide text-white">ALQUILA SV</span>
+              </div>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -58,5 +65,6 @@ const mainNavItems: NavItem[] = [
       <NavUser />
     </SidebarFooter>
   </Sidebar>
+
   <slot />
 </template>

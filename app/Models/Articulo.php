@@ -33,8 +33,11 @@ class Articulo extends Model
     }
 
    
-    public function imagenes()
-    {
-        return $this->hasMany(ImgArticulo::class, 'articulo_id');
-    }
+
+
+        public function imagenes()
+        {
+            return $this->hasMany(ImgArticulo::class, 'articulo_id');
+        }
+
 }
