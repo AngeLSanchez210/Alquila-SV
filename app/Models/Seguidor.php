@@ -9,6 +9,8 @@ class Seguidor extends Model
 {
     use HasFactory;
 
+    protected $table = 'seguidores'; // Nombre correcto de la tabla
+
     protected $fillable = ['seguidor_id', 'seguido_id'];
 
     public function seguidor()

@@ -141,6 +141,23 @@ Route::get('/api/planes', [PlanController::class, 'index'])->name('api.planes');
 Route::get('/api/articulos/{articulo}', [ArticuloController::class, 'show'])->name('api.articulos.show');
 
 
+// Ruta para la vista de perfil de usuario
+Route::get('/profile/{user_id}', function ($user_id) {
+    $user = \App\Models\User::find($user_id);
+    $articulosCount = \App\Models\Articulo::where('usuario_id', $user_id)->count();
+    $seguidoresCount = \App\Models\Seguidor::where('seguido_id', $user_id)->count();
+    $isPremium = \App\Models\Suscripcion::where('usuario_id', $user_id)->where('plan_id', '>', 1)->exists();
+
+    return Inertia::render('SeguirCompleto', [
+        'userId' => $user_id,
+        'userName' => $user->name ?? 'Sofía Ramírez',
+        'userEmail' => $user->email ?? 'sofia.ramirez@example.com',
+        'articulosCount' => $articulosCount,
+        'seguidoresCount' => $seguidoresCount,
+        'isPremium' => $isPremium
+    ]);
+})->name('profile');
+
 // Archivos de configuración y autenticación
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
