@@ -1,4 +1,5 @@
 <template>
+  <Header />
   <div class="bg-gray-100">
     <div class="max-w-4xl mx-auto px-4 py-10">
       <div class="bg-white rounded-3xl shadow-lg p-8 flex flex-col md:flex-row items-center gap-8">
@@ -40,56 +41,56 @@
       </div>
     </div>
   </div>
+  <Footer />
 </template>
 
-<script>
-export default {
-  props: {
-    userId: {
-      type: [Number, String],
-      required: true
-    },
-    userName: {
-      type: String,
-      default: 'Sofía Ramírez'
-    },
-    userEmail: {
-      type: String,
-      default: 'sofia.ramirez@example.com'
-    },
-    articulosCount: {
-      type: Number,
-      default: 0
-    },
-    seguidoresCount: {
-      type: Number,
-      default: 0
-    },
-    isPremium: {
-      type: Boolean,
-      default: false
-    }
+<script setup>
+import Header from '@/components/Header.vue';
+import Footer from '@/components/Footer.vue';
+import { ref, computed } from 'vue';
+
+// Props
+defineProps({
+  userId: {
+    type: [Number, String],
+    required: true,
   },
-  data() {
-    return {
-      isFollowing: false
-    };
+  userName: {
+    type: String,
+    default: 'Sofía Ramírez',
   },
-  computed: {
-    buttonText() {
-      return this.isFollowing ? 'Siguiendo' : 'Seguir';
-    },
-    buttonClass() {
-      return this.isFollowing
-        ? 'bg-gray-400 cursor-not-allowed text-white font-medium px-6 py-2 rounded-xl transition'
-        : 'bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-xl transition';
-    }
+  userEmail: {
+    type: String,
+    default: 'sofia.ramirez@example.com',
   },
-  methods: {
-    follow() {
-      this.isFollowing = true;
-    }
-  }
+  articulosCount: {
+    type: Number,
+    default: 0,
+  },
+  seguidoresCount: {
+    type: Number,
+    default: 0,
+  },
+  isPremium: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+// Reactive state
+const isFollowing = ref(false);
+
+// Computed properties
+const buttonText = computed(() => (isFollowing.value ? 'Siguiendo' : 'Seguir'));
+const buttonClass = computed(() =>
+  isFollowing.value
+    ? 'bg-gray-400 cursor-not-allowed text-white font-medium px-6 py-2 rounded-xl transition'
+    : 'bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-xl transition'
+);
+
+// Methods
+const follow = () => {
+  isFollowing.value = true;
 };
 </script>
 
