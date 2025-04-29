@@ -208,7 +208,9 @@ public function ver(Articulo $articulo)
     $articulo->load('categoria', 'usuario', 'imagenes');
 
     return Inertia::render('ArticuloDetalle', [
-        'articulo' => $articulo
+        'articulo' => $articulo,
+        'nombre_usuario' => $articulo->usuario->name,
+        'id_usuario' => $articulo->usuario->id, // Agregar el ID del usuario
     ]);
 }
 

@@ -361,7 +361,9 @@ const limpiarFiltros = () => {
           <div class="mt-4 border-t pt-4 text-sm text-gray-600 space-y-2">
             <p><strong>Categoría:</strong> {{ articuloSeleccionado.categoria?.nombre || 'Sin categoría' }}</p>
             <p><strong>Estado:</strong> {{ articuloSeleccionado.estado }}</p>
-            <p><strong>Publicado por:</strong> {{ articuloSeleccionado.usuario?.name || 'Desconocido' }}</p>
+            <p><strong>Publicado por:</strong> <a :href="`/profile/${articuloSeleccionado.usuario?.id}`" 
+              class="text-indigo-600 hover:text-indigo-800 underline">{{ articuloSeleccionado.usuario?.name || 'Desconocido' }}</a> 
+            </p>
             <p><strong>Fecha de publicación:</strong> {{ new Date(articuloSeleccionado.created_at).toLocaleString() }}</p>
           </div>
 
