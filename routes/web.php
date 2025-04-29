@@ -144,20 +144,36 @@ Route::get('/api/articulos/{articulo}', [ArticuloController::class, 'show'])->na
 // Ruta para la vista de perfil de usuario
 Route::get('/profile/{user_id}', function ($user_id) {
     $user = \App\Models\User::find($user_id);
+
+    if (!$user) {
+        return Inertia::render('Errors/404');
+    }
+
     $articulosCount = \App\Models\Articulo::where('usuario_id', $user_id)->count();
     $seguidoresCount = \App\Models\Seguidor::where('seguido_id', $user_id)->count();
     $isPremium = \App\Models\Suscripcion::where('usuario_id', $user_id)->where('plan_id', '>', 1)->exists();
 
     return Inertia::render('SeguirCompleto', [
         'userId' => $user_id,
-        'userName' => $user->name ?? 'Sofía Ramírez',
-        'userEmail' => $user->email ?? 'sofia.ramirez@example.com',
+        'userName' => $user->name,
+        'userEmail' => $user->email,
         'articulosCount' => $articulosCount,
         'seguidoresCount' => $seguidoresCount,
         'isPremium' => $isPremium
     ]);
 })->name('profile');
 
+// Ruta de fallback para manejar rutas no encontradas
+Route::fallback(function () {
+    return Inertia::render('Errors/404');
+});
+
 // Archivos de configuración y autenticación
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
+
+// Rutas para la funcionalidad de seguidores
+Route::middleware(['auth'])->group(function () {
+    Route::post('/seguir/{seguido_id}', [\App\Http\Controllers\SeguidorController::class, 'store'])->name('seguir');
+    Route::delete('/dejar-seguir/{seguido_id}', [\App\Http\Controllers\SeguidorController::class, 'destroy'])->name('dejar-seguir');
+});

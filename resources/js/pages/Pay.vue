@@ -1,5 +1,6 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center px-4 text-gray-700">
+  <Header></Header>
+  <div class="min-h-screen flex items-center justify-center px-4 text-gray-700 bg-gray-50">
     <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 space-y-6">
       <h2 class="text-2xl font-bold text-center">Confirmar Suscripción</h2>
       <p class="text-center text-gray-600">
@@ -79,12 +80,15 @@
       </p>
     </div>
   </div>
+  <Footer></Footer>
 </template>
 
 <script setup>
 import axios from 'axios';
 import { ref, onMounted } from 'vue';
 import Swal from 'sweetalert2';
+import Header from '@/components/Header.vue';
+import Footer from '@/components/Footer.vue';
 
 const metodoPago = ref('');
 const correoPaypal = ref('');
@@ -94,7 +98,7 @@ const tarjetaDatos = ref({
   expiracion: '',
   cvv: '',
 });
-const planId = ref(1);
+//const planId = ref(2); // Cambia el valor predeterminado a 2
 
 onMounted(() => {
   const params = new URLSearchParams(window.location.search);
