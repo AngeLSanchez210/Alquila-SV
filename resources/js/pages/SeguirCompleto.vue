@@ -48,9 +48,18 @@
 import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
 import { ref, computed } from 'vue';
+import axios from 'axios';
+import { usePage } from '@inertiajs/vue3';
 
-// Props
-defineProps({
+// Desestructurar props directamente
+const {
+  userId,
+  userName,
+  userEmail,
+  articulosCount,
+  seguidoresCount,
+  isPremium,
+} = defineProps({
   userId: {
     type: [Number, String],
     required: true,
@@ -88,11 +97,28 @@ const buttonClass = computed(() =>
     : 'bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-xl transition'
 );
 
+// Obtener el usuario logueado desde Inertia
+const page = usePage();
+const loggedInUserId = page.props.auth.user.id;
+
 // Methods
-const follow = () => {
-  isFollowing.value = true;
+const follow = async () => {
+  try {
+    const response = await axios.post('/api/seguidores', {
+      seguidor_id: loggedInUserId, // ID del usuario logueado
+      seguido_id: userId,          // ID del usuario visualizado
+    });
+    if (response.status === 201) {
+      isFollowing.value = true;
+    }
+  } catch (error) {
+    console.error('Error al seguir al usuario:', error);
+    console.log('seguidor_id:', loggedInUserId);
+    console.log('seguido_id:', userId);
+  }
 };
 </script>
+
 
 <style scoped>
 /* Agrega estilos específicos para esta vista aquí */
