@@ -11,23 +11,22 @@ use App\Http\Controllers\PlanController;
 use App\Http\Middleware\Denegade;
 use App\Models\Plan;
 use App\Http\Controllers\PagoController;
-use App\Http\Controllers\SeguidorController;
 
 // Ruta de inicio
 Route::get('/', function () {
     return Inertia::render('Home');
 })->name('home');
 
+
 // Ruta del dashboard del usuario
 Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified' ])->name('dashboard');
-
-// Ruta del dashboard de administrador
-Route::get('/admin/dashboard', function () {
     return Inertia::render('AdminDashboard');
-})->middleware(['auth', 'verified', 'role:Admin'])->name('admin.dashboard');
+})->middleware(['auth', 'verified' ,'role:Admin' ])->name('dashboard');
 
+// // Ruta del dashboard de administrador
+// Route::get('/admin/dashboard', function () {
+//     return Inertia::render('Dashboard');
+// })->middleware(['auth', 'verified', 'role:Admin'])->name('admin.dashboard');
 
 // ADMIN ELIMINAR E EDITAR USUARIOS
 // Ruta para crear un nuevo usuario
@@ -144,26 +143,16 @@ Route::get('/api/articulos/{articulo}', [ArticuloController::class, 'show'])->na
 
 // Ruta para la vista de perfil de usuario
 Route::get('/profile/{user_id}', function ($user_id) {
-    // Buscar el usuario por ID
     $user = \App\Models\User::find($user_id);
 
-    // Si el usuario no existe, renderizar la página de error 404
     if (!$user) {
         return Inertia::render('Errors/404');
     }
 
-    // Contar los artículos publicados por el usuario
     $articulosCount = \App\Models\Articulo::where('usuario_id', $user_id)->count();
-
-    // Contar los seguidores del usuario
     $seguidoresCount = \App\Models\Seguidor::where('seguido_id', $user_id)->count();
+    $isPremium = \App\Models\Suscripcion::where('usuario_id', $user_id)->where('plan_id', '>', 1)->exists();
 
-    // Verificar si el usuario tiene una suscripción premium
-    $isPremium = \App\Models\Suscripcion::where('usuario_id', $user_id)
-                                         ->where('plan_id', '>', 1)
-                                         ->exists();
-
-    // Renderizar la vista `SeguirCompleto` con los datos del usuario
     return Inertia::render('SeguirCompleto', [
         'userId' => $user_id,
         'userName' => $user->name,
@@ -185,7 +174,6 @@ require __DIR__.'/auth.php';
 
 // Rutas para la funcionalidad de seguidores
 Route::middleware(['auth'])->group(function () {
-    Route::get('/seguidores', [SeguidorController::class, 'index'])->name('seguidores.index');
-    Route::post('/api/seguidores', [SeguidorController::class, 'store'])->name('seguidores.store'); // Asegúrate de que esta ruta exista
-    Route::delete('/seguidores/{seguidor}', [SeguidorController::class, 'destroy'])->name('seguidores.destroy');
+    Route::post('/seguir/{seguido_id}', [\App\Http\Controllers\SeguidorController::class, 'store'])->name('seguir');
+    Route::delete('/dejar-seguir/{seguido_id}', [\App\Http\Controllers\SeguidorController::class, 'destroy'])->name('dejar-seguir');
 });
