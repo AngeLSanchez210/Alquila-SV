@@ -70,6 +70,12 @@ class User extends Authenticatable
         return $this->hasMany(Suscripcion::class);
     }
 
+    public function suscripcionActiva()
+{
+    return $this->hasOne(Suscripcion::class)
+        ->where('estado', 'activa'); 
+}
+
     public function seguidores()
     {
         return $this->hasMany(Seguidor::class, 'seguido_id');

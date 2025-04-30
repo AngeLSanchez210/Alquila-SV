@@ -30,7 +30,6 @@ const onFileChange = (event: Event) => {
     const fileInput = event.target as HTMLInputElement;
     if (fileInput.files && fileInput.files.length > 0) {
         const filesArray = Array.from(fileInput.files);
-        // Filtrar solo imágenes jpg o png
         const validFiles = filesArray.filter(file =>
             file.type === 'image/jpeg' || file.type === 'image/png'
         );
@@ -50,11 +49,8 @@ const onFileChange = (event: Event) => {
 const submit = () => {
     const formData = new FormData();
     formData.append('nombre', form.value.nombre);
-
-    // Resaltar el precio y tipo en la descripción
     const descripcionCompleta = `${form.value.descripcion}\n\n**Precio ${form.value.tipo_precio.toUpperCase()}**`;
     formData.append('descripcion', descripcionCompleta);
-
     formData.append('precio', form.value.precio);
     formData.append('estado', form.value.estado);
     formData.append('idcategoria', form.value.idcategoria);
@@ -76,20 +72,47 @@ const submit = () => {
                 cancelButtonColor: '#3b82f6',
             }).then((result) => {
                 if (result.isConfirmed) {
-                    form.value = { nombre: '', descripcion: '', precio: '', estado: 'disponible', idcategoria: '', imagenes: [], tipo_precio: 'por día' };
+                    form.value = {
+                        nombre: '',
+                        descripcion: '',
+                        precio: '',
+                        estado: 'disponible',
+                        idcategoria: '',
+                        imagenes: [],
+                        tipo_precio: 'por día'
+                    };
                     if (fileInputRef.value) fileInputRef.value.value = '';
                 } else {
                     router.visit('/');
                 }
             });
         })
-        .catch(() => {
-            Swal.fire({
-                title: 'Error',
-                text: 'Hubo un problema al guardar el artículo.',
-                icon: 'error',
-                confirmButtonColor: '#ef4444'
-            });
+        .catch((error) => {
+            const status = error.response?.status;
+            const errorMsg = error.response?.data?.error || 'Hubo un problema al guardar el artículo.';
+
+            if (status === 403) {
+                Swal.fire({
+                    title: 'Límite alcanzado',
+                    text: errorMsg,
+                    icon: 'warning',
+                    confirmButtonColor: '#f97316'
+                });
+            } else if (status === 401) {
+                Swal.fire({
+                    title: 'No autenticado',
+                    text: 'Debes iniciar sesión para publicar artículos.',
+                    icon: 'error',
+                    confirmButtonColor: '#ef4444'
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: errorMsg,
+                    icon: 'error',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
         });
 };
 </script>

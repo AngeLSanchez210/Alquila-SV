@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Articulo;
 use App\Models\ImgArticulo;
 use App\Models\Categoria;
+use App\Models\Suscripcion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -53,40 +54,69 @@ class ArticuloController extends Controller
     }
     
     public function store(Request $request)
-    {
-        $data = $request->validate([
-            'nombre' => 'required|string',
-            'descripcion' => 'required|string',
-            'precio' => 'required|numeric',
-            'estado' => 'required|in:disponible,alquilado',
-            'idcategoria' => 'nullable|exists:categorias,id', // Validación para idcategoria
-            'imagenes.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
-        ]);
-
-        $articulo = Articulo::create([
-            'nombre' => $data['nombre'],
-            'descripcion' => $data['descripcion'],
-            'precio' => $data['precio'],
-            'estado' => $data['estado'],
-            'idcategoria' => $request->idcategoria, // Guardar el idcategoria
-            'usuario_id' => auth()->id(), 
-        ]);
-
-        if ($request->hasFile('imagenes')) {
-            foreach ($request->file('imagenes') as $imagen) {
-                $imagePath = $imagen->store('articulos', 'public');
-                ImgArticulo::create([
-                    'articulo_id' => $articulo->id,
-                    'link' => $imagePath,
-                ]);
-            }
-        }
-
-        return response()->json([
-            'message' => 'Artículo creado con éxito.',
-            'articulo' => $articulo,
-        ]);
+{
+    $user = auth()->user();
+    if (!$user) {
+        return response()->json(['error' => 'Usuario no autenticado.'], 401);
     }
+
+    
+    $suscripcion = \App\Models\Suscripcion::where('usuario_id', $user->id)
+        ->where('estado', 'activa') 
+        ->with('plan')
+        ->first();
+
+    
+        $maxPublicaciones = 3; 
+    if ($suscripcion && $suscripcion->plan && $suscripcion->plan->max_publicaciones) {
+        $maxPublicaciones = $suscripcion->plan->max_publicaciones;
+    }
+
+   
+    $articulosPublicados = Articulo::where('usuario_id', $user->id)->count();
+
+    if ($articulosPublicados >= $maxPublicaciones) {
+        return response()->json([
+            'error' => 'Has alcanzado el límite de publicaciones permitidas por tu plan.',
+        ], 403);
+    }
+
+    // Validar y guardar artículo
+    $data = $request->validate([
+        'nombre' => 'required|string',
+        'descripcion' => 'required|string',
+        'precio' => 'required|numeric',
+        'estado' => 'required|in:disponible,alquilado',
+        'idcategoria' => 'nullable|exists:categorias,id',
+        'imagenes.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    $articulo = Articulo::create([
+        'nombre' => $data['nombre'],
+        'descripcion' => $data['descripcion'],
+        'precio' => $data['precio'],
+        'estado' => $data['estado'],
+        'idcategoria' => $request->idcategoria,
+        'usuario_id' => $user->id,
+    ]);
+
+    if ($request->hasFile('imagenes')) {
+        foreach ($request->file('imagenes') as $imagen) {
+            $imagePath = $imagen->store('articulos', 'public');
+            ImgArticulo::create([
+                'articulo_id' => $articulo->id,
+                'link' => $imagePath,
+            ]);
+        }
+    }
+
+    return response()->json([
+        'message' => 'Artículo creado con éxito.',
+        'articulo' => $articulo,
+    ]);
+}
+
+
 
     public function show(Articulo $articulo)
     {

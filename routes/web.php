@@ -47,7 +47,7 @@ Route::get('/user/{user}', [UserController::class, 'show'])->name('user.show');
 
 // Rutas para los artículos
 Route::post('/articulos/{articulo}/images', [ArticuloController::class, 'uploadImages']);
-Route::post('/articulos', [ArticuloController::class, 'store']);
+// Route::post('/articulos', [ArticuloController::class, 'store']);
 
 // Ruta para la vista de artículos
 Route::get('/articulos', function () {
@@ -62,7 +62,8 @@ Route::get('/articulos/create', [ArticuloController::class, 'create'])->middlewa
 
 
 // Ruta para almacenar artículos
-Route::post('/articulos', [ArticuloController::class, 'store'])->name('articulos.store');
+Route::post('/articulos', [ArticuloController::class, 'store'])->middleware(['auth', 'verified'])->name('articulos.store');
+
 
 
 
