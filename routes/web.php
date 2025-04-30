@@ -11,6 +11,9 @@ use App\Http\Controllers\PlanController;
 use App\Http\Middleware\Denegade;
 use App\Models\Plan;
 use App\Http\Controllers\PagoController;
+use App\Http\Controllers\SeguidorController;
+
+Route::get('/api/seguidores/{seguidor_id}/{seguido_id}', [SeguidorController::class, 'checkFollowing']);
 
 // Ruta de inicio
 Route::get('/', function () {
@@ -169,8 +172,8 @@ require __DIR__.'/auth.php';
 
 // Rutas para la funcionalidad de seguidores
 Route::middleware(['auth'])->group(function () {
-    Route::post('/seguir/{seguido_id}', [\App\Http\Controllers\SeguidorController::class, 'store'])->name('seguir');
-    Route::delete('/dejar-seguir/{seguido_id}', [\App\Http\Controllers\SeguidorController::class, 'destroy'])->name('dejar-seguir');
+    Route::post('/seguir', [SeguidorController::class, 'store'])->name('seguir');
+    Route::post('/dejar-seguir', [SeguidorController::class, 'destroy']);
 });
 
 // Rutas para manejar la imagen del usuario

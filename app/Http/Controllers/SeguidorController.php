@@ -2,44 +2,63 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Seguidor;
 use Illuminate\Http\Request;
+use App\Models\Seguidor;
 
 class SeguidorController extends Controller
 {
-    // Obtener todos los seguidores con relaciones
-    public function index()
-    {
-        return Seguidor::with('seguidor', 'seguido')->get();
-    }
-
-    // Crear un nuevo seguidor
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'seguidor_id' => 'required|exists:users,id', // ID del usuario que sigue
-            'seguido_id' => 'required|exists:users,id', // ID del usuario seguido
+        $request->validate([
+            'seguidor_id' => 'required|integer|exists:users,id',
+            'seguido_id' => 'required|integer|exists:users,id',
         ]);
 
-        // Verificar si ya existe la relación
-        $existe = Seguidor::where('seguidor_id', $data['seguidor_id'])
-                          ->where('seguido_id', $data['seguido_id'])
-                          ->exists();
-
-        if ($existe) {
-            return response()->json(['message' => 'Ya sigues a este usuario'], 200);
+        if ($request->seguidor_id === $request->seguido_id) {
+            return response()->json(['message' => 'No puedes seguirte a ti mismo.'], 400);
         }
 
-        // Crear la relación
-        $seguidor = Seguidor::create($data);
+        // Verificar si ya existe el seguidor
+        $exists = Seguidor::where('seguidor_id', $request->seguidor_id)
+            ->where('seguido_id', $request->seguido_id)
+            ->exists();
 
-        return response()->json($seguidor, 201);
+        if ($exists) {
+            return response()->json(['message' => 'El usuario ya sigue a este perfil'], 409);
+        }
+
+        Seguidor::create([
+            'seguidor_id' => $request->seguidor_id,
+            'seguido_id' => $request->seguido_id,
+        ]);
+
+        return response()->json(['message' => 'Usuario seguido con éxito'], 201);
     }
 
-    // Eliminar un seguidor
-    public function destroy(Seguidor $seguidor)
+    public function destroy(Request $request)
     {
-        $seguidor->delete();
-        return response()->noContent();
+        $request->validate([
+            'seguidor_id' => 'required|integer|exists:users,id',
+            'seguido_id' => 'required|integer|exists:users,id',
+        ]);
+
+        $deleted = Seguidor::where('seguidor_id', $request->seguidor_id)
+            ->where('seguido_id', $request->seguido_id)
+            ->delete();
+
+        if ($deleted) {
+            return response()->json(['message' => 'Usuario dejado de seguir con éxito'], 200);
+        }
+
+        return response()->json(['message' => 'No se encontró la relación de seguimiento'], 404);
+    }
+
+    public function checkFollowing($seguidor_id, $seguido_id)
+    {
+        $isFollowing = Seguidor::where('seguidor_id', $seguidor_id)
+            ->where('seguido_id', $seguido_id)
+            ->exists();
+
+        return response()->json(['isFollowing' => $isFollowing], 200);
     }
 }

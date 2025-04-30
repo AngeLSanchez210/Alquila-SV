@@ -42,7 +42,7 @@
 
           <!-- Botón seguir -->
           <div class="mt-6">
-            <button @click="follow" :disabled="isFollowing" :class="buttonClass">
+            <button @click="isFollowing ? unfollow() : follow()" :class="buttonClass">
               {{ buttonText }}
             </button>
           </div>
@@ -121,10 +121,10 @@ const cerrarImagenModal = () => {
 };
 
 // Computed properties
-const buttonText = computed(() => (isFollowing.value ? 'Siguiendo' : 'Seguir'));
+const buttonText = computed(() => (isFollowing.value ? 'Dejar de seguir' : 'Seguir'));
 const buttonClass = computed(() =>
   isFollowing.value
-    ? 'bg-gray-400 cursor-not-allowed text-white font-medium px-6 py-2 rounded-xl transition'
+    ? 'bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-2 rounded-xl transition'
     : 'bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-xl transition'
 );
 
@@ -134,8 +134,13 @@ const loggedInUserId = page.props.auth.user.id;
 
 // Methods
 const follow = async () => {
+  if (loggedInUserId === userId) {
+    alert('No puedes seguirte a ti mismo.');
+    return;
+  }
+
   try {
-    const response = await axios.post('/api/seguidores', {
+    const response = await axios.post('/seguir', {
       seguidor_id: loggedInUserId, // ID del usuario logueado
       seguido_id: userId,          // ID del usuario visualizado
     });
@@ -143,9 +148,40 @@ const follow = async () => {
       isFollowing.value = true;
     }
   } catch (error) {
-    console.error('Error al seguir al usuario:', error);
-    console.log('seguidor_id:', loggedInUserId);
-    console.log('seguido_id:', userId);
+    if (error.response && error.response.status === 409) {
+      console.warn('El usuario ya sigue a este perfil.');
+    } else {
+      console.error('Error al seguir al usuario:', error);
+    }
+  }
+};
+
+const unfollow = async () => {
+  try {
+    const response = await axios.post('/dejar-seguir', {
+      seguidor_id: loggedInUserId, // ID del usuario logueado
+      seguido_id: userId,          // ID del usuario visualizado
+    });
+    if (response.status === 200) {
+      isFollowing.value = false;
+    }
+  } catch (error) {
+    console.error('Error al dejar de seguir al usuario:', error);
+  }
+};
+
+// Verificar si el usuario ya sigue al usuario visualizado
+const checkFollowingStatus = async () => {
+  try {
+    const response = await axios.get(`/api/seguidores/${loggedInUserId}/${userId}`);
+    if (response.status === 200) {
+      isFollowing.value = response.data.isFollowing; // Asegurarse de que el backend devuelva un valor booleano
+    } else {
+      isFollowing.value = false; // Si no hay respuesta válida, asumir que no sigue
+    }
+  } catch (error) {
+    console.error('Error al verificar el estado de seguimiento:', error);
+    isFollowing.value = false; // En caso de error, asumir que no sigue
   }
 };
 
@@ -160,6 +196,7 @@ const fetchUserImage = async () => {
 
 onMounted(() => {
   fetchUserImage();
+  checkFollowingStatus(); // Asegurarse de que esta función se ejecute correctamente al montar el componente
 });
 </script>
 
