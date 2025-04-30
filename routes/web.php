@@ -18,15 +18,10 @@ Route::get('/', function () {
 })->name('home');
 
 
-// Ruta del dashboard del usuario
 Route::get('dashboard', function () {
-    return Inertia::render('AdminDashboard');
-})->middleware(['auth', 'verified' ,'role:Admin' ])->name('dashboard');
+    return Inertia::render('Dashboard');
+})->middleware(['auth', 'verified', 'role:Admin'])->name('dashboard');
 
-// // Ruta del dashboard de administrador
-// Route::get('/admin/dashboard', function () {
-//     return Inertia::render('Dashboard');
-// })->middleware(['auth', 'verified', 'role:Admin'])->name('admin.dashboard');
 
 // ADMIN ELIMINAR E EDITAR USUARIOS
 // Ruta para crear un nuevo usuario
