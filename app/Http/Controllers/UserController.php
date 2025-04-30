@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -78,5 +79,30 @@ class UserController extends Controller
         $user->delete();
 
         return response()->json(['message' => 'Usuario eliminado correctamente']);
+    }
+
+    public function getImage(User $user)
+    {
+        $image = $user->image()->first();
+        return response()->json(['image_url' => $image ? $image->image_url : null]);
+    }
+
+    public function uploadImage(Request $request, User $user)
+    {
+        $request->validate(['image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048']);
+
+        // Eliminar la imagen anterior si existe
+        if ($user->image) {
+            Storage::disk('public')->delete($user->image->image_url);
+            $user->image()->delete();
+        }
+
+        // Subir la nueva imagen
+        $path = $request->file('image')->store('user_images', 'public');
+
+        // Guardar la nueva imagen en la base de datos
+        $user->image()->create(['image_url' => $path]);
+
+        return response()->json(['image_url' => $path]);
     }
 }

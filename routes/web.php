@@ -172,3 +172,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/seguir/{seguido_id}', [\App\Http\Controllers\SeguidorController::class, 'store'])->name('seguir');
     Route::delete('/dejar-seguir/{seguido_id}', [\App\Http\Controllers\SeguidorController::class, 'destroy'])->name('dejar-seguir');
 });
+
+// Rutas para manejar la imagen del usuario
+Route::get('/api/users/{user}/image', [UserController::class, 'getImage'])->name('users.image.get');
+Route::post('/api/users/{user}/image', [UserController::class, 'uploadImage'])->name('users.image.upload');

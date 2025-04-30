@@ -79,4 +79,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Seguidor::class, 'seguidor_id');
     }
+
+    public function image()
+    {
+        return $this->hasOne(ImgUser::class);
+    }
 }

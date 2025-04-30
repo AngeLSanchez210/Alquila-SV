@@ -5,7 +5,16 @@
       <div class="bg-white rounded-3xl shadow-lg p-8 flex flex-col md:flex-row items-center gap-8">
         <!-- Foto de perfil -->
         <div class="flex-shrink-0">
-          <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Foto de usuario" class="w-48 h-48 rounded-full object-cover shadow-md border-4 border-white">
+          <img
+            v-if="userImage"
+            :src="`/storage/${userImage}`"
+            alt="Foto de usuario"
+            class="w-48 h-48 rounded-full object-cover shadow-md border-4 border-white cursor-pointer"
+            @click="abrirImagenModal(`/storage/${userImage}`)"
+          />
+          <div v-else class="w-48 h-48 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+            Sin Imagen
+          </div>
         </div>
 
         <!-- Información del usuario -->
@@ -41,13 +50,22 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal para visualizar imagen -->
+  <div v-if="mostrarImagenModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+    <div class="relative">
+      <img :src="imagenSeleccionada" alt="Imagen ampliada" class="max-w-full max-h-screen rounded-lg">
+      <button @click="cerrarImagenModal" class="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 hover:bg-red-700">✕</button>
+    </div>
+  </div>
+
   <Footer />
 </template>
 
 <script setup>
 import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { usePage } from '@inertiajs/vue3';
 
@@ -88,6 +106,19 @@ const {
 
 // Reactive state
 const isFollowing = ref(false);
+const userImage = ref(null);
+const imagenSeleccionada = ref(null);
+const mostrarImagenModal = ref(false);
+
+const abrirImagenModal = (imagen) => {
+  imagenSeleccionada.value = imagen;
+  mostrarImagenModal.value = true;
+};
+
+const cerrarImagenModal = () => {
+  mostrarImagenModal.value = false;
+  imagenSeleccionada.value = null;
+};
 
 // Computed properties
 const buttonText = computed(() => (isFollowing.value ? 'Siguiendo' : 'Seguir'));
@@ -117,8 +148,20 @@ const follow = async () => {
     console.log('seguido_id:', userId);
   }
 };
-</script>
 
+const fetchUserImage = async () => {
+  try {
+    const response = await axios.get(`/api/users/${userId}/image`);
+    userImage.value = response.data.image_url;
+  } catch (error) {
+    console.error('Error al cargar la imagen del usuario:', error);
+  }
+};
+
+onMounted(() => {
+  fetchUserImage();
+});
+</script>
 
 <style scoped>
 /* Agrega estilos específicos para esta vista aquí */

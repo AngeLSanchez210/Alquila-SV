@@ -174,6 +174,35 @@ const eliminarFavorito = async (favoritoId) => {
   }
 };
 
+const userImage = ref(null);
+
+const fetchUserImage = async () => {
+  try {
+    const response = await axios.get(`/api/users/${props.user.id}/image`);
+    userImage.value = response.data.image_url;
+  } catch (error) {
+    console.error('Error al cargar la imagen del usuario:', error);
+  }
+};
+
+const uploadUserImage = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const response = await axios.post(`/api/users/${props.user.id}/image`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    userImage.value = response.data.image_url;
+    Swal.fire('Éxito', 'La imagen fue actualizada correctamente.', 'success');
+  } catch (error) {
+    Swal.fire('Error', 'No se pudo actualizar la imagen.', 'error');
+  }
+};
+
 onMounted(() => {
   // Obtener parámetros de la URL
   const params = new URLSearchParams(window.location.search);
@@ -186,9 +215,23 @@ onMounted(() => {
 
   fetchArticulos();
   fetchFavoritos();
+  fetchUserImage();
 });
 const redirectToCreateArticulo = () => {
   window.location.href = '/articulos/create';
+};
+
+const imagenSeleccionada = ref(null);
+const mostrarImagenModal = ref(false);
+
+const abrirImagenModal = (imagen) => {
+  imagenSeleccionada.value = imagen;
+  mostrarImagenModal.value = true;
+};
+
+const cerrarImagenModal = () => {
+  mostrarImagenModal.value = false;
+  imagenSeleccionada.value = null;
 };
 </script>
 
@@ -228,11 +271,23 @@ const redirectToCreateArticulo = () => {
       <!-- Contenido Principal -->
       <section class="w-3/4 ml-6">
         <!-- Información del Usuario -->
-        <section
-          v-if="activeSection === 'info'"
-          class="bg-white p-6 rounded-lg shadow-md ">
+        <section v-if="activeSection === 'info'" class="bg-white p-6 rounded-lg shadow-md">
           <h2 class="text-2xl font-bold mb-4 text-gray-700">Información Personal</h2>
           <div class="space-y-4">
+            <!-- Imagen del usuario -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Imagen de Perfil:</label>
+              <div class="flex items-center gap-4">
+                <img
+                  v-if="userImage"
+                  :src="`/storage/${userImage}`"
+                  alt="Imagen del usuario"
+                  class="w-24 h-24 object-cover rounded-full border cursor-pointer"
+                  @click="abrirImagenModal(`/storage/${userImage}`)"
+                />
+                <input type="file" @change="uploadUserImage" class="text-sm text-gray-600">
+              </div>
+            </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Nombre:</label>
               <p class="text-gray-900">{{ user.name }}</p>
@@ -302,11 +357,11 @@ const redirectToCreateArticulo = () => {
           <ul class="space-y-4">
             <li v-for="articulo in articulos" :key="articulo.id" class="border-b pb-4 flex items-center gap-4">
               <img
-                    @click="verArticulo(articulo.id)"
-                    :src="'/storage/' + articulo.imagenes[0]?.link"
-                    alt="Imagen del artículo"
-                    class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition"
-                  />
+                @click="abrirImagenModal('/storage/' + articulo.imagenes[0]?.link)"
+                :src="'/storage/' + articulo.imagenes[0]?.link"
+                alt="Imagen del artículo"
+                class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition"
+              />
    
               <div class="flex-1">
                 <h3 class="text-lg font-medium text-gray-900">{{ articulo.nombre }}</h3>
@@ -374,13 +429,15 @@ const redirectToCreateArticulo = () => {
               class="border-b pb-4 flex items-center gap-4"
             >
             <img
-        @click="verArticulo(favorito.articulo.id)"
-        :src="favorito.articulo.imagenes && favorito.articulo.imagenes.length > 0 
-          ? '/storage/' + favorito.articulo.imagenes[0].link 
-          : '/images/default-placeholder.png'"
-        alt="Imagen del artículo"
-        class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition"
-      >
+              @click="abrirImagenModal(favorito.articulo.imagenes && favorito.articulo.imagenes.length > 0 
+                ? '/storage/' + favorito.articulo.imagenes[0].link 
+                : '/images/default-placeholder.png')"
+              :src="favorito.articulo.imagenes && favorito.articulo.imagenes.length > 0 
+                ? '/storage/' + favorito.articulo.imagenes[0].link 
+                : '/images/default-placeholder.png'"
+              alt="Imagen del artículo"
+              class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition"
+            >
               <div class="flex-1">
                 <h3 class="text-lg font-medium text-gray-900">{{ favorito.articulo.nombre }}</h3>
                 <p class="text-sm text-gray-600">{{ favorito.articulo.descripcion }}</p>
@@ -398,6 +455,12 @@ const redirectToCreateArticulo = () => {
         </section>
       </section>
     </div>
+    <div v-if="mostrarImagenModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+    <div class="relative">
+      <img :src="imagenSeleccionada" alt="Imagen ampliada" class="max-w-full max-h-screen rounded-lg">
+      <button @click="cerrarImagenModal" class="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 hover:bg-red-700">✕</button>
+    </div>
+  </div>
   </body>
   <Footer></Footer>
 </template>
