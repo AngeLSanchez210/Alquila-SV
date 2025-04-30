@@ -81,6 +81,16 @@ const menuItems = [
   { name: 'Tecnología', action: () => router.visit('/articulos', { method: 'get', data: { categoria: 'Tecnología' }, preserveScroll: true }) },
 ];
 
+const logout = async () => {
+  try {
+    await router.post(route('logout')); // Usar router.post para realizar el logout
+    closeProfileMenu();
+    window.location.reload(); // Recargar la página después del logout
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error);
+  }
+};
+
 </script>
 
 <template>
@@ -195,7 +205,8 @@ const menuItems = [
 
             <!-- Perfil info -->
             <div class="ml-4 flow-root lg:ml-6">
-              <div class="relative">
+              <div v-if="props.auth.user" class="relative">
+                <!-- Imagen de perfil -->
                 <img
                   alt="tania andrew"
                   src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=1480&amp;q=80"
@@ -210,6 +221,7 @@ const menuItems = [
                   data-popover-placement="bottom"
                   class="absolute z-10 hidden min-w-[180px] flex-col gap-2 overflow-auto rounded-md border border-gray-200 bg-white p-3 font-sans text-sm font-normal text-gray-700 shadow-lg transition duration-300 ease-in-out transform right-0"
                 >
+                  <!-- Opciones del menú -->
                   <button
                     tabIndex="-1"
                     role="menuitem"
@@ -293,7 +305,7 @@ const menuItems = [
                     tabIndex="-1"
                     role="menuitem"
                     class="text-gray-600 hover:text-gray-900 flex w-full cursor-pointer select-none items-center gap-2 rounded-md px-3 pt-[9px] pb-2 text-start leading-tight outline-none transition-all hover:bg-blue-gray-50 hover:bg-opacity-80 hover:text-blue-gray-900 focus:bg-blue-gray-50 focus:bg-opacity-80 focus:text-blue-gray-900 active:bg-blue-gray-50 active:bg-opacity-80 active:text-blue-gray-900"
-                    @click="$inertia.post(route('logout')); closeProfileMenu()"
+                    @click="logout"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -315,6 +327,15 @@ const menuItems = [
                     </p>
                   </button>
                 </ul>
+              </div>
+              <div v-else>
+                <!-- Botón de iniciar sesión -->
+                <button
+                  @click="router.visit('/login')"
+                  class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg transition"
+                >
+                  Iniciar sesión
+                </button>
               </div>
             </div>
 
