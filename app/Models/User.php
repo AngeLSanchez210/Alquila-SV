@@ -67,7 +67,7 @@ class User extends Authenticatable
 
     public function suscripciones()
     {
-        return $this->hasMany(Suscripcion::class);
+        return $this->hasMany(Suscripcion::class, 'usuario_id');
     }
 
     public function suscripcionActiva()
@@ -91,3 +91,4 @@ class User extends Authenticatable
         return $this->hasOne(ImgUser::class);
     }
 }
+
