@@ -203,6 +203,43 @@ const uploadUserImage = async (event) => {
   }
 };
 
+const suscripcionActiva = ref(null);
+
+const fetchSuscripcionActiva = async () => {
+  try {
+    const response = await axios.get(`/api/users/${props.user.id}/suscripcion-activa`);
+    suscripcionActiva.value = response.data;
+  } catch (error) {
+    console.error('Error al cargar la suscripción activa:', error);
+  }
+};
+
+const planes = ref([]);
+const mostrarPlanes = ref(false);
+
+const fetchPlanes = async () => {
+  try {
+    const response = await axios.get('/api/planes');
+    planes.value = response.data;
+  } catch (error) {
+    console.error('Error al cargar los planes:', error);
+  }
+};
+
+const mejorarPlan = () => {
+  mostrarPlanes.value = true;
+};
+
+const mostrarModalPlanes = ref(false);
+
+const abrirModalPlanes = () => {
+  mostrarModalPlanes.value = true;
+};
+
+const cerrarModalPlanes = () => {
+  mostrarModalPlanes.value = false;
+};
+
 onMounted(() => {
   // Obtener parámetros de la URL
   const params = new URLSearchParams(window.location.search);
@@ -216,6 +253,8 @@ onMounted(() => {
   fetchArticulos();
   fetchFavoritos();
   fetchUserImage();
+  fetchSuscripcionActiva();
+  fetchPlanes();
 });
 const redirectToCreateArticulo = () => {
   window.location.href = '/articulos/create';
@@ -261,6 +300,13 @@ const cerrarImagenModal = () => {
             @click="setActiveSection('favorites')"
           >
             Favoritos
+          </button>
+          <button
+            class="block w-full text-left text-gray-700 font-medium hover:text-blue-500 transition-colors duration-200"
+            :class="{ 'text-blue-500 font-semibold': activeSection === 'planuser' }"
+            @click="setActiveSection('planuser')"
+          >
+            Mis suscripciones
           </button>
         </nav>
       </aside>
@@ -450,6 +496,114 @@ const cerrarImagenModal = () => {
           </ul>
           <p v-if="favoritos.length === 0" class="text-gray-600">No tienes artículos en tus favoritos.</p>
         </section>
+        <section
+          v-if="activeSection === 'planuser'"
+          class="bg-white p-6 rounded-lg shadow-md mb-auto text-teal-950">
+          <h2 class="text-2xl font-bold mb-4 text-gray-700">Suscripción Activa</h2>
+          <div v-if="suscripcionActiva" class="space-y-4">
+            <p><strong>Plan:</strong> {{ suscripcionActiva.plan.nombre }}</p>
+            <p><strong>Precio:</strong> ${{ suscripcionActiva.plan.precio }}</p>
+            <p><strong>Fecha de Inicio:</strong> {{ new Date(suscripcionActiva.fecha_inicio).toLocaleDateString() }}</p>
+            <p><strong>Fecha de Fin:</strong> {{ new Date(suscripcionActiva.fecha_fin).toLocaleDateString() }}</p>
+            <p><strong>Estado:</strong> {{ suscripcionActiva.estado }}</p>
+            <button
+              @click="abrirModalPlanes"
+              class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+            >
+              Mejorar Plan
+            </button>
+          </div>
+          <p v-else class="text-gray-600">No tienes una suscripción activa.</p>
+        </section>
+
+        <!-- Modal para mostrar planes -->
+        <div v-if="mostrarModalPlanes" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div class="bg-white rounded-lg max-w-4xl w-full p-6">
+            <h3 class="text-xl font-bold mb-4 text-gray-700">Selecciona un Nuevo Plan</h3>
+            <button
+              @click="cerrarModalPlanes"
+              class="absolute top-4 right-4 bg-red-600 text-white rounded-full p-2 hover:bg-red-700"
+            >
+              ✕
+            </button>
+            <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 lg:grid-cols-3 gap-x-4">
+              <div
+                v-for="(plan, index) in planes"
+                :key="plan.id"
+                :class="[
+                  'relative rounded-3xl p-8 ring-1',
+                  plan.precio === Math.max(...planes.map(p => p.precio))
+                    ? 'bg-gray-900 text-gray-300 shadow-2xl ring-gray-900/10'
+                    : 'bg-white text-gray-600 ring-gray-900/10',
+                ]"
+              >
+                <h3
+                  :id="`tier-${plan.nombre.toLowerCase()}`"
+                  :class="plan.precio === Math.max(...planes.map(p => p.precio)) ? 'text-indigo-400' : 'text-indigo-600'"
+                >
+                  {{ plan.nombre }}
+                </h3>
+                <p class="mt-4 flex items-baseline gap-x-2">
+                  <span
+                    :class="plan.precio === Math.max(...planes.map(p => p.precio)) ? 'text-white' : 'text-gray-900'"
+                    class="text-5xl font-semibold tracking-tight"
+                  >
+                    ${{ plan.precio }}
+                  </span>
+                  <span
+                    :class="plan.precio === Math.max(...planes.map(p => p.precio)) ? 'text-gray-400' : 'text-gray-500'"
+                    class="text-base"
+                  >
+                    /mes
+                  </span>
+                </p>
+                <p
+                  class="mt-6 text-base/7"
+                  :class="plan.precio === Math.max(...planes.map(p => p.precio)) ? 'text-gray-300' : 'text-gray-600'"
+                >
+                  {{ plan.descripcion.split(',')[0] }}
+                </p>
+                <ul
+                  role="list"
+                  class="mt-8 space-y-3 text-sm/6"
+                  :class="plan.precio === Math.max(...planes.map(p => p.precio)) ? 'text-gray-300' : 'text-gray-600'"
+                >
+                  <li
+                    v-for="(item, i) in plan.descripcion.split(',').slice(1)"
+                    :key="i"
+                    class="flex gap-x-3"
+                  >
+                    <svg
+                      :class="plan.precio === Math.max(...planes.map(p => p.precio)) ? 'text-indigo-400' : 'text-indigo-600'"
+                      class="h-6 w-5 flex-none"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    {{ item }}
+                  </li>
+                </ul>
+                <a
+                  v-if="plan.precio > 0"
+                  :href="`/pay?plan_id=${plan.id}`"
+                  :aria-describedby="`tier-${plan.nombre.toLowerCase()}`"
+                  class="mt-8 block rounded-md px-3.5 py-2.5 text-center text-sm font-semibold"
+                  :class="plan.precio === Math.max(...planes.map(p => p.precio))
+                    ? 'bg-indigo-500 text-white hover:bg-indigo-400 focus-visible:outline-indigo-500'
+                    : 'text-indigo-600 ring-1 ring-indigo-200 ring-inset hover:ring-indigo-300 focus-visible:outline-indigo-600'"
+                >
+                  {{ plan.precio === Math.max(...planes.map(p => p.precio)) ? 'Contactar ventas' : 'Seleccionar Plan' }}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
     <div v-if="mostrarImagenModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">

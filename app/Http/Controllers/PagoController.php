@@ -60,29 +60,28 @@ class PagoController extends Controller
                 ->first();
 
             if ($suscripcion) {
-                if ($suscripcion->plan_id == 1) {
-                    // Cancelar la suscripción actual
-                    $suscripcion->update([
-                        'estado' => 'cancelada',
-                        'fecha_fin' => now(),
-                    ]);
+                // // Verificar si el cliente confirmó la cancelación del plan actual
+                // if (!$request->has('confirmar_cancelacion') || !$request->boolean('confirmar_cancelacion')) {
+                //     return response()->json([
+                //         'error' => 'Debes confirmar que deseas cancelar tu plan actual sin opción de reembolso.'
+                //     ], 400);
+                // }
 
-                    // Crear nueva suscripción
-                    Suscripcion::create([
-                        'usuario_id' => $user->id,
-                        'plan_id' => $plan->id,
-                        'pago_id' => $pago->id,
-                        'fecha_inicio' => now(),
-                        'fecha_fin' => now()->addDays($plan->duracion),
-                        'estado' => 'activa',
-                    ]);
-                } else {
-                    // Revertir pago y cancelar operación
-                    DB::rollBack();
-                    return response()->json([
-                        'error' => 'Ya tienes una suscripción activa. No puedes adquirir un nuevo plan hasta que termine.'
-                    ], 400);
-                }
+                // Cancelar la suscripción actual
+                $suscripcion->update([
+                    'estado' => 'cancelada',
+                    'fecha_fin' => now(),
+                ]);
+
+                // Crear nueva suscripción con el nuevo plan
+                Suscripcion::create([
+                    'usuario_id' => $user->id,
+                    'plan_id' => $plan->id,
+                    'pago_id' => $pago->id,
+                    'fecha_inicio' => now(),
+                    'fecha_fin' => now()->addDays($plan->duracion),
+                    'estado' => 'activa',
+                ]);
             } else {
                 // Revisar si no se creó una suscripción recientemente (doble pago protección)
                 $suscripcionExistente = Suscripcion::where('usuario_id', $user->id)

@@ -12,6 +12,7 @@ use App\Http\Middleware\Denegade;
 use App\Models\Plan;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\SeguidorController;
+use App\Http\Controllers\SuscripcionController;
 
 Route::get('/api/seguidores/{seguidor_id}/{seguido_id}', [SeguidorController::class, 'checkFollowing']);
 
@@ -136,6 +137,7 @@ Route::delete('/planes/{plan}', [PlanController::class, 'destroy'])->name('plane
 // Ruta para obtener los planes en formato JSON
 Route::get('/api/planes', [PlanController::class, 'index'])->name('api.planes');
 
+Route::get('/api/planes/{plan}', [PlanController::class, 'show']);
 
 Route::get('/api/articulos/{articulo}', [ArticuloController::class, 'show'])->name('api.articulos.show');
 
@@ -180,3 +182,4 @@ Route::middleware(['auth'])->group(function () {
 // Rutas para manejar la imagen del usuario
 Route::get('/api/users/{user}/image', [UserController::class, 'getImage'])->name('users.image.get');
 Route::post('/api/users/{user}/image', [UserController::class, 'uploadImage'])->name('users.image.upload');
+Route::get('/api/users/{user}/suscripcion-activa', [SuscripcionController::class, 'getSuscripcionActiva']);

@@ -14,7 +14,7 @@ class PlanController extends Controller
 
     public function show(Plan $plan)
     {
-        return $plan;
+        return response()->json($plan);
     }
 
     public function store(Request $request)

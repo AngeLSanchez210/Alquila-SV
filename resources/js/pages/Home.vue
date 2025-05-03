@@ -17,10 +17,10 @@ const planes = ref([]);
 
 onMounted(async () => {
   try {
-    const response = await axios.get('/api/planes');
-    planes.value = response.data;
+    const response = await axios.get('/api/planes'); // Solicitud a la API para obtener los planes
+    planes.value = response.data; // Se asignan los datos de los planes a la variable 'planes'
   } catch (error) {
-    console.error('Error al cargar los planes:', error);
+    console.error('Error al cargar los planes:', error); // Manejo de errores
   }
 });
 </script>
@@ -165,7 +165,7 @@ onMounted(async () => {
       </div>
       <p class="mx-auto mt-6 max-w-2xl text-center text-lg font-medium text-pretty text-gray-700 sm:text-xl/8">Nuestros planes de membresía ofrecen beneficios exclusivos, descuentos y prioridad en reservas. Encuentra la opción ideal para tus necesidades de alquiler.</p>
       
-      <div class="mx-auto mt-16 grid max-w-lg grid-cols-1 items-center gap-y-6 sm:mt-20 sm:gap-y-8 lg:max-w-5xl lg:grid-cols-3">
+      <div class="mx-auto mt-16 grid max-w-lg grid-cols-1 items-center gap-y-6 sm:mt-20 sm:gap-y-6 lg:max-w-5xl lg:grid-cols-3 lg:gap-x-4">
         <div
           v-for="(plan, index) in planes"
           :key="plan.id"

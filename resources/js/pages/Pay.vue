@@ -4,13 +4,13 @@
     <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 space-y-6">
       <h2 class="text-2xl font-bold text-center">Confirmar Suscripción</h2>
       <p class="text-center text-gray-600">
-        Estás a punto de adquirir el plan <span class="font-semibold text-indigo-600">Premium Mensual</span>.
+        Estás a punto de adquirir el plan <span class="font-semibold text-indigo-600">{{ plan.nombre }}</span>.
       </p>
 
       <div class="bg-indigo-50 p-4 rounded-xl flex items-center justify-between">
         <div>
           <p class="text-sm text-gray-500">Costo</p>
-          <p class="text-lg font-semibold">$9.99 / mes</p>
+          <p class="text-lg font-semibold">${{ plan.precio }} / mes</p>
         </div>
         <span class="text-green-600 text-sm font-medium bg-green-100 px-3 py-1 rounded-full">Sin contratos</span>
       </div>
@@ -98,13 +98,22 @@ const tarjetaDatos = ref({
   expiracion: '',
   cvv: '',
 });
-//const planId = ref(2); // Cambia el valor predeterminado a 2
+const planId = ref(2); // Cambia el valor predeterminado a 2
+const plan = ref({ nombre: '', precio: 0 });
 
-onMounted(() => {
+onMounted(async () => {
   const params = new URLSearchParams(window.location.search);
   const plan_id = params.get('plan_id');
+  console.log('Plan ID:', plan_id);
+
   if (plan_id) {
     planId.value = parseInt(plan_id, 10);
+    try {
+      const response = await axios.get(`/api/planes/${planId.value}`); // Solicita los datos del plan
+      plan.value = response.data; // Asigna los datos del plan a la variable reactiva
+    } catch (error) {
+      console.error('Error al cargar el plan:', error);
+    }
   }
 });
 
