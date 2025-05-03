@@ -10,6 +10,10 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\PlanController;
 use App\Http\Middleware\Denegade;
 use App\Models\Plan;
+use App\Models\Articulo;
+use App\Models\Seguidor;
+use App\Models\User;
+use App\Models\Suscripcion;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\SeguidorController;
 use App\Http\Controllers\SuscripcionController;
@@ -144,15 +148,21 @@ Route::get('/api/articulos/{articulo}', [ArticuloController::class, 'show'])->na
 
 // Ruta para la vista de perfil de usuario
 Route::get('/profile/{user_id}', function ($user_id) {
-    $user = \App\Models\User::find($user_id);
+    $user = User::find($user_id);
 
     if (!$user) {
         return Inertia::render('Errors/404');
     }
 
-    $articulosCount = \App\Models\Articulo::where('usuario_id', $user_id)->count();
-    $seguidoresCount = \App\Models\Seguidor::where('seguido_id', $user_id)->count();
-    $isPremium = \App\Models\Suscripcion::where('usuario_id', $user_id)->where('plan_id', '>', 1)->exists();
+    $articulosCount = Articulo::where('usuario_id', $user_id)->count();
+    $seguidoresCount = Seguidor::where('seguido_id', $user_id)->count();
+    $isPremium = Suscripcion::where('usuario_id', $user_id)->where('plan_id', '>', 1)->exists();
+
+    // 🔹 Agregar artículos con relaciones necesarias
+    $articulos = Articulo::with('imagenes', 'categoria')
+        ->where('usuario_id', $user_id)
+        ->latest()
+        ->get();
 
     return Inertia::render('SeguirCompleto', [
         'userId' => $user_id,
@@ -160,7 +170,8 @@ Route::get('/profile/{user_id}', function ($user_id) {
         'userEmail' => $user->email,
         'articulosCount' => $articulosCount,
         'seguidoresCount' => $seguidoresCount,
-        'isPremium' => $isPremium
+        'isPremium' => $isPremium,
+        'articulos' => $articulos, 
     ]);
 })->name('profile');
 

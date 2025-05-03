@@ -143,8 +143,16 @@ const agregarPuntuacion = async () => {
 
           <div class="mt-4 space-y-2 text-gray-700 text-sm">
             <p><strong>Categoría:</strong> {{ articulo.categoria?.nombre || 'Sin categoría' }}</p>
-            <p><strong>Publicado por:</strong> {{ articulo.usuario?.name || 'Desconocido' }}</p>
-            <p><strong>Publicado el:</strong> {{ new Date(articulo.created_at).toLocaleString() }}</p>
+            <p>
+                  <strong>Publicado por:</strong> 
+                  <a 
+                    :href="`/profile/${articulo.usuario?.id}`" 
+                    class="text-indigo-600 hover:text-indigo-800 underline"
+                  >
+                    {{ articulo.usuario?.name || 'Desconocido' }}
+                  </a>
+                </p>
+            <p><strong>Fecha de Publicacion:</strong> {{ new Date(articulo.created_at).toLocaleString() }}</p>
           </div>
 
           <!-- WhatsApp Contact -->
