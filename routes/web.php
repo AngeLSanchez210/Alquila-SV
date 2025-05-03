@@ -183,3 +183,5 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/api/users/{user}/image', [UserController::class, 'getImage'])->name('users.image.get');
 Route::post('/api/users/{user}/image', [UserController::class, 'uploadImage'])->name('users.image.upload');
 Route::get('/api/users/{user}/suscripcion-activa', [SuscripcionController::class, 'getSuscripcionActiva']);
+
+

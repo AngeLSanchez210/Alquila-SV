@@ -14,25 +14,39 @@ use Inertia\Inertia;
 class ArticuloController extends Controller
 {
     public function index(Request $request)
-    {
-        // Iniciar la consulta base
-        $query = Articulo::with('imagenes', 'usuario', 'categoria');
-        
-        // Aplicar filtro de precio si está presente
-        if ($request->has('precio_max') && is_numeric($request->precio_max)) {
-            $query->where('precio', '<=', $request->precio_max);
-        }
-        
-        // Aplicar filtro de categorías si está presente
-        if ($request->has('categorias') && is_array($request->categorias) && count($request->categorias) > 0) {
-            $query->whereHas('categoria', function($q) use ($request) {
-                $q->whereIn('nombre', $request->categorias);
+{
+    $query = Articulo::with('imagenes', 'usuario', 'categoria')
+        ->with(['usuario.suscripciones.plan']) // precargar para evitar N+1
+
+        ->withCount(['usuario as es_destacado' => function ($q) {
+            $q->whereHas('suscripciones', function ($s) {
+                $s->where('estado', 'activa')
+                  ->whereHas('plan', function ($p) {
+                      $p->where('destacar', true);
+                  });
             });
-        }
-        
-        $articulos = $query->get();
-        return response()->json($articulos);
+        }]);
+
+
+    if ($request->has('precio_max') && is_numeric($request->precio_max)) {
+        $query->where('precio', '<=', $request->precio_max);
     }
+
+
+    if ($request->has('categorias') && is_array($request->categorias) && count($request->categorias) > 0) {
+        $query->whereHas('categoria', function($q) use ($request) {
+            $q->whereIn('nombre', $request->categorias);
+        });
+    }
+
+   
+    $query->orderByDesc('es_destacado');
+
+    $articulos = $query->get();
+
+    return response()->json($articulos);
+}
+
 
     public function vista()
     {
@@ -221,12 +235,23 @@ class ArticuloController extends Controller
     {
         $query = $request->input('q');
     
-        $articulos = Articulo::with('imagenes')  
-            ->where('nombre', 'like', "%$query%")
-            ->orWhere('descripcion', 'like', "%$query%")
-            ->orWhereHas('categoria', function ($q) use ($query) {
-                $q->where('nombre', 'like', "%$query%");
+        $articulos = Articulo::with('imagenes')
+            ->withCount(['usuario as es_destacado' => function ($q) {
+                $q->whereHas('suscripciones', function ($s) {
+                    $s->where('estado', 'activa')
+                      ->whereHas('plan', function ($p) {
+                          $p->where('destacar', true);
+                      });
+                });
+            }])
+            ->where(function ($q) use ($query) {
+                $q->where('nombre', 'like', "%$query%")
+                  ->orWhere('descripcion', 'like', "%$query%")
+                  ->orWhereHas('categoria', function ($cat) use ($query) {
+                      $cat->where('nombre', 'like', "%$query%");
+                  });
             })
+            ->orderByDesc('es_destacado')
             ->limit(10)
             ->get();
     
