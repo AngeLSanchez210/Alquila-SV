@@ -11,8 +11,9 @@ const adminName = ref('');
 <template>
   <Head title="Dashboard Administrador" />
 
+
   <AppLayout>
-    
+    <h1 class="text-white">holaaaaaaaaaaa</h1>
   </AppLayout>
 </template>
 

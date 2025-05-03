@@ -20,6 +20,21 @@ const comentario = ref('');
 const puntuacion = ref(0);
 const user = usePage().props.auth.user;
 
+// --- Mini Modal Imagen ---
+const imagenAmpliada = ref(null);
+const mostrarMiniModal = ref(false);
+
+const abrirMiniModal = (imgUrl) => {
+  imagenAmpliada.value = imgUrl;
+  mostrarMiniModal.value = true;
+};
+
+const cerrarMiniModal = () => {
+  mostrarMiniModal.value = false;
+  imagenAmpliada.value = null;
+};
+// --------------------------
+
 const agregarAFavoritos = async () => {
   if (!user) {
     Swal.fire({
@@ -112,7 +127,8 @@ const agregarPuntuacion = async () => {
             <img
               :src="img.link ? `/storage/${img.link}` : 'https://via.placeholder.com/600'"
               :alt="articulo.nombre"
-              class="w-full h-[400px] object-cover"
+              class="w-full h-[400px] object-cover cursor-pointer hover:opacity-90 transition"
+              @click="abrirMiniModal(`/storage/${img.link}`)"
             />
           </swiper-slide>
         </swiper>
@@ -186,6 +202,22 @@ const agregarPuntuacion = async () => {
     </div>
   </section>
 
+  <!-- MINI MODAL IMAGEN -->
+  <div v-if="mostrarMiniModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl overflow-hidden shadow-lg p-4 max-w-lg w-full relative">
+      <img
+        :src="imagenAmpliada"
+        alt="Vista ampliada"
+        class="w-full object-contain rounded"
+      />
+      <button
+        @click="cerrarMiniModal"
+        class="absolute top-2 right-2 bg-red-600 text-white rounded-full px-3 py-1 hover:bg-red-700"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+
   <Footer />
 </template>
-

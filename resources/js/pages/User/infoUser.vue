@@ -224,10 +224,7 @@ const redirectToCreateArticulo = () => {
 const imagenSeleccionada = ref(null);
 const mostrarImagenModal = ref(false);
 
-const abrirImagenModal = (imagen) => {
-  imagenSeleccionada.value = imagen;
-  mostrarImagenModal.value = true;
-};
+
 
 const cerrarImagenModal = () => {
   mostrarImagenModal.value = false;
@@ -357,11 +354,12 @@ const cerrarImagenModal = () => {
           <ul class="space-y-4">
             <li v-for="articulo in articulos" :key="articulo.id" class="border-b pb-4 flex items-center gap-4">
               <img
-                @click="abrirImagenModal('/storage/' + articulo.imagenes[0]?.link)"
-                :src="'/storage/' + articulo.imagenes[0]?.link"
-                alt="Imagen del artículo"
-                class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition"
-              />
+                      @click="verArticulo(articulo.id)"
+                      :src="'/storage/' + articulo.imagenes[0]?.link"
+                      alt="Imagen del artículo"
+                      class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition"
+                    />
+
    
               <div class="flex-1">
                 <h3 class="text-lg font-medium text-gray-900">{{ articulo.nombre }}</h3>
@@ -429,15 +427,14 @@ const cerrarImagenModal = () => {
               class="border-b pb-4 flex items-center gap-4"
             >
             <img
-              @click="abrirImagenModal(favorito.articulo.imagenes && favorito.articulo.imagenes.length > 0 
-                ? '/storage/' + favorito.articulo.imagenes[0].link 
-                : '/images/default-placeholder.png')"
-              :src="favorito.articulo.imagenes && favorito.articulo.imagenes.length > 0 
-                ? '/storage/' + favorito.articulo.imagenes[0].link 
-                : '/images/default-placeholder.png'"
-              alt="Imagen del artículo"
-              class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition"
-            >
+                        @click="verArticulo(favorito.articulo.id)"
+                        :src="favorito.articulo.imagenes && favorito.articulo.imagenes.length > 0 
+                          ? '/storage/' + favorito.articulo.imagenes[0].link 
+                          : '/images/default-placeholder.png'"
+                        alt="Imagen del artículo"
+                        class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition"
+                      />
+
               <div class="flex-1">
                 <h3 class="text-lg font-medium text-gray-900">{{ favorito.articulo.nombre }}</h3>
                 <p class="text-sm text-gray-600">{{ favorito.articulo.descripcion }}</p>

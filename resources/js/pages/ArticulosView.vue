@@ -143,6 +143,22 @@ const limpiarFiltros = () => {
   priceRange.value = 1000;
   Object.keys(categoriasSeleccionadas.value).forEach(cat => { categoriasSeleccionadas.value[cat] = false; });
 };
+
+
+// --- Mini Modal Imagen ---
+const imagenAmpliada = ref(null);
+const mostrarMiniModal = ref(false);
+
+const abrirMiniModal = (imgUrl) => {
+  imagenAmpliada.value = imgUrl;
+  mostrarMiniModal.value = true;
+};
+
+const cerrarMiniModal = () => {
+  mostrarMiniModal.value = false;
+  imagenAmpliada.value = null;
+};
+
 </script>
 
 
@@ -246,10 +262,12 @@ const limpiarFiltros = () => {
             >
               <swiper-slide v-for="imagen in articulo.imagenes" :key="imagen.id">
                 <img
-                  :src="imagen.link ? `/storage/${imagen.link}` : 'https://via.placeholder.com/300x200'"
-                  :alt="articulo.nombre"
-                  class="w-full h-60 object-cover"
-                />
+                    :src="imagen.link ? `/storage/${imagen.link}` : 'https://via.placeholder.com/300x200'"
+                    :alt="articulo.nombre"
+                    class="w-full h-60 object-cover cursor-zoom-in"
+                    @click="abrirMiniModal('/storage/' + imagen.link)"
+                  />
+
               </swiper-slide>
             </swiper>
 
@@ -307,8 +325,10 @@ const limpiarFiltros = () => {
               <img
                 :src="imagen.link ? `/storage/${imagen.link}` : 'https://via.placeholder.com/600x400'"
                 :alt="articuloSeleccionado.nombre"
-                class="w-full h-[400px] object-cover"
+                class="w-full h-[400px] object-cover cursor-zoom-in"
+                @click="abrirMiniModal('/storage/' + imagen.link)"
               />
+
             </swiper-slide>
           </swiper>
         </div>
@@ -420,6 +440,21 @@ const limpiarFiltros = () => {
         </div>
       </div>
     </div>
+  </div>
+</div>
+<!-- Mini Modal de Imagen -->
+<div v-if="mostrarMiniModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center">
+  <div class="relative max-w-4xl w-full p-4">
+    <img
+      :src="imagenAmpliada"
+      class="rounded-lg shadow-xl max-h-[90vh] w-full object-contain"
+    />
+    <button
+      @click="cerrarMiniModal"
+      class="absolute top-3 right-3 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition"
+    >
+      ✕
+    </button>
   </div>
 </div>
 
