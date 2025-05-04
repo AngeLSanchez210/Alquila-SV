@@ -14,5 +14,9 @@ class ImgArticulo extends Model
     public function articulo()
     {
         return $this->belongsTo(Articulo::class);
+ 
     }
+
+  
+
 }

@@ -168,10 +168,10 @@ class ArticuloController extends Controller
     public function destroy(Articulo $articulo)
 {
     try {
-        // Verificar que el usuario actual es el propietario del artículo
-        if ($articulo->usuario_id !== auth()->id()) {
-            return response()->json(['error' => 'No autorizado'], 403);
-        }
+        // // Verificar que el usuario actual es el propietario del artículo
+        // if ($articulo->usuario_id !== auth()->id()) {
+        //     return response()->json(['error' => 'No autorizado'], 403);
+        // }
         
         // Eliminar imágenes asociadas
         foreach ($articulo->imagenes as $imagen) {

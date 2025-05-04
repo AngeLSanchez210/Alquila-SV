@@ -9,7 +9,7 @@ interface Articulo {
   nombre: string;
   precio: number;
   estado: string;
-  imagenes: { id: number; ruta: string }[];
+  imagenes: { id: number; link: string }[];
 }
 
 const articulos = ref<Articulo[]>([]);
@@ -53,6 +53,21 @@ const deleteArticulo = async (id: number) => {
     }
   }
 };
+
+const imagenSeleccionada = ref<string | null>(null);
+const mostrarModalImagen = ref(false);
+
+const verImagen = (ruta: string) => {
+  imagenSeleccionada.value = `/storage/${ruta}`;
+  mostrarModalImagen.value = true;
+};
+
+const cerrarModal = () => {
+  mostrarModalImagen.value = false;
+  imagenSeleccionada.value = null;
+};
+
+
 </script>
 
 <template>
@@ -99,13 +114,16 @@ const deleteArticulo = async (id: number) => {
                 <td class="px-6 py-4 capitalize">{{ articulo.estado }}</td>
                 <td class="px-6 py-4">
                   <div class="flex gap-2 mt-2 flex-wrap">
-                    <img
-                      v-for="imagen in articulo.imagenes"
-                      :key="imagen.id"
-                      :src="'/storage/' + imagen.ruta"
-                      class="w-20 h-20 object-cover rounded-md shadow-sm"
-                      alt="Imagen del artículo"
-                    />
+                    <div class="flex gap-2 mt-2 flex-wrap">
+                      <img
+                        v-for="imagen in articulo.imagenes"
+                        :key="imagen.id"
+                        :src="'/storage/' + imagen.link"
+                        @click="verImagen(imagen.link)"
+                        class="w-20 h-20 object-cover rounded-md shadow-sm cursor-pointer hover:ring-2 hover:ring-indigo-500 transition"
+                        alt="Imagen del artículo"
+                      />
+                    </div>
                   </div>
                 </td>
                 <td class="px-6 py-4 space-x-2">
@@ -126,6 +144,27 @@ const deleteArticulo = async (id: number) => {
           </table>
         </div>
       </div>
+
+      <!-- Modal para vista previa de imagen -->
+          <div
+            v-if="mostrarModalImagen"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            @click.self="cerrarModal"
+          >
+            <div class="bg-white rounded-xl p-4 shadow-lg max-w-md w-full text-center">
+              <img
+              :src="imagenSeleccionada ?? ''"
+                alt="Vista previa"
+                class="w-full h-auto rounded-md max-h-[70vh] object-contain"
+              />
+              <button
+                @click="cerrarModal"
+                class="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
 
     </div>
   </AppLayout>

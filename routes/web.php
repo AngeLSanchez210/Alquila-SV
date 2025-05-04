@@ -29,6 +29,9 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified', 'role:Admin'])->name('dashboard');
 
+Route::get('/unauthorized', function () {
+    return Inertia::render('Unauthorized');
+})->name('unauthorized');
 
 // ADMIN ELIMINAR E EDITAR USUARIOS
 // Ruta para crear un nuevo usuario
@@ -71,14 +74,21 @@ Route::post('/articulos', [ArticuloController::class, 'store'])->middleware(['au
 
 
 
+
 //ADMIN PANEL
 Route::get('/admin/users', function () {
     return Inertia::render('admin/adminUsers'); 
-})->name('admin.users');
+})->middleware(['auth', 'verified', 'role:Admin'])->name('admin.users');
 
 Route::get('/admin/items', function () {
     return Inertia::render('admin/adminArticles'); 
-})->name('admin.items');
+})->middleware(['auth', 'verified', 'role:Admin'])->name('admin.items');
+
+
+Route::get('/planes', function () {
+    return inertia::render('admin/Planes');
+})->middleware(['auth', 'verified', 'role:Admin'])->name('planes');
+
 
 
 Route::get('/articulos/search', [ArticuloController::class, 'apiSearch'])->name('api.articulos.search');
@@ -124,9 +134,7 @@ Route::get('/articulos/ver/{articulo}', [ArticuloController::class, 'ver'])->nam
 Route::get('/categorias', [CategoriaController::class, 'index']);
 
 // Ruta para la vista de los planes
-Route::get('/planes', function () {
-    return inertia::render('admin/Planes');
-})->name('planes');
+
 
 // Ruta para crear un nuevo plan
 Route::post('/planes', [PlanController::class, 'store'])->name('planes.store');

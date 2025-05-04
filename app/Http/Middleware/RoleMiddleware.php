@@ -11,7 +11,7 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, string $role): Response
     {
         if (!auth()->check() || auth()->user()->role !== $role) {
-            abort(403, 'No tienes permiso para acceder a esta página.');
+            return redirect()->route('unauthorized')->with('error', 'No tienes permiso para acceder.');
         }
 
         return $next($request);
