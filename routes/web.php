@@ -18,7 +18,6 @@ use App\Http\Controllers\PagoController;
 use App\Http\Controllers\SeguidorController;
 use App\Http\Controllers\SuscripcionController;
 
-Route::get('/api/seguidores/{seguidor_id}/{seguido_id}', [SeguidorController::class, 'checkFollowing']);
 
 // Ruta de inicio
 Route::get('/', function () {
@@ -196,3 +195,6 @@ Route::post('/api/users/{user}/image', [UserController::class, 'uploadImage'])->
 Route::get('/api/users/{user}/suscripcion-activa', [SuscripcionController::class, 'getSuscripcionActiva']);
 
 
+Route::get('/api/seguidores/lista/{userId}', [SeguidorController::class, 'listarSeguidores']);
+
+Route::get('/api/seguidores/{seguidor_id}/{seguido_id}', [SeguidorController::class, 'checkFollowing']);

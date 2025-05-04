@@ -26,8 +26,8 @@
               <p class="text-lg font-semibold text-indigo-600">{{ articulosCount }}</p>
               <p class="text-sm text-gray-500">Productos publicados</p>
             </div>
-            <div>
-              <p class="text-lg font-semibold text-indigo-600">{{ seguidoresCount }}</p>
+            <div @click="abrirModalSeguidores" class="cursor-pointer hover:text-indigo-800">
+              <p class="text-lg font-semibold text-indigo-600 underline">{{ seguidoresCount }}</p>
               <p class="text-sm text-gray-500">Seguidores</p>
             </div>
             <div v-if="isPremium">
@@ -43,36 +43,35 @@
           </div>
         </div>
       </div>
-        <!-- Artículos -->
-  <div class="mt-12 max-w-6xl mx-auto px-4 py-10 bg-gray-50 rounded-xl shadow-inner">
-    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Artículos publicados</h3>
-    <div v-if="articulos.length" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <div
-        v-for="articulo in articulos"
-        :key="articulo.id"
-        class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
-        @click="verArticulo(articulo.id)"
-      >
-        <div class="w-full h-40 bg-gray-100">
-          <img
-            v-if="articulo.imagenes.length"
-            :src="`/storage/${articulo.imagenes[0].link}`"
-            :alt="articulo.nombre"
-            class="w-full h-full object-cover"
-          />
-          <div v-else class="flex items-center justify-center h-full text-gray-400">Sin imagen</div>
+
+      <!-- Artículos -->
+      <div class="mt-12 max-w-6xl mx-auto px-4 py-10 bg-gray-50 rounded-xl shadow-inner">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Artículos publicados</h3>
+        <div v-if="articulos.length" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            v-for="articulo in articulos"
+            :key="articulo.id"
+            class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
+            @click="verArticulo(articulo.id)"
+          >
+            <div class="w-full h-40 bg-gray-100">
+              <img
+                v-if="articulo.imagenes.length"
+                :src="`/storage/${articulo.imagenes[0].link}`"
+                :alt="articulo.nombre"
+                class="w-full h-full object-cover"
+              />
+              <div v-else class="flex items-center justify-center h-full text-gray-400">Sin imagen</div>
+            </div>
+            <div class="p-3">
+              <h4 class="text-base font-semibold text-gray-800 truncate">{{ articulo.nombre }}</h4>
+            </div>
+          </div>
         </div>
-        <div class="p-3">
-          <h4 class="text-base font-semibold text-gray-800 truncate">{{ articulo.nombre }}</h4>
-        </div>
+        <div v-else class="text-gray-500 text-center">Este usuario no ha publicado ningún artículo aún.</div>
       </div>
     </div>
-    <div v-else class="text-gray-500 text-center">Este usuario no ha publicado ningún artículo aún.</div>
   </div>
-    </div>
-  </div>
-
-
 
   <!-- Modal de imagen -->
   <div v-if="mostrarImagenModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
@@ -81,6 +80,32 @@
       <button @click="cerrarImagenModal" class="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 hover:bg-red-700">✕</button>
     </div>
   </div>
+
+  <!-- Modal de seguidores -->
+  <div
+  v-if="mostrarModalSeguidores"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+>
+  <div class="bg-white p-6 rounded-2xl shadow-2xl max-h-[80vh] overflow-y-auto w-96 relative">
+    <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">Seguidores</h3>
+
+    <ul v-if="seguidores.length" class="space-y-4">
+      <li
+        v-for="seguidor in seguidores"
+        :key="seguidor.id"
+        @click="verPerfil(seguidor.id)"
+        class="flex items-center gap-4 hover:bg-gray-100 p-2 rounded-lg cursor-pointer transition"
+      >
+        <span class="text-gray-800 font-medium">{{ seguidor.name }}</span>
+      </li>
+    </ul>
+
+    <p v-else class="text-gray-500 text-center">Este usuario no tiene seguidores aún.</p>
+
+    <button @click="cerrarModalSeguidores" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 text-xl">✕</button>
+  </div>
+</div>
+
 
   <Footer />
 </template>
@@ -117,6 +142,12 @@ const isFollowing = ref(false);
 const userImage = ref(null);
 const imagenSeleccionada = ref(null);
 const mostrarImagenModal = ref(false);
+const mostrarModalSeguidores = ref(false);
+const seguidores = ref([]);
+
+const verPerfil = (id) => {
+  router.visit(`/profile/${id}`);
+};
 
 const abrirImagenModal = (img) => {
   imagenSeleccionada.value = img;
@@ -126,6 +157,10 @@ const abrirImagenModal = (img) => {
 const cerrarImagenModal = () => {
   mostrarImagenModal.value = false;
   imagenSeleccionada.value = null;
+};
+
+const cerrarModalSeguidores = () => {
+  mostrarModalSeguidores.value = false;
 };
 
 const buttonText = computed(() => (isFollowing.value ? 'Dejar de seguir' : 'Seguir'));
@@ -179,6 +214,17 @@ const fetchUserImage = async () => {
     userImage.value = res.data.image_url;
   } catch (error) {
     console.error('Error al cargar imagen:', error);
+  }
+};
+
+const abrirModalSeguidores = async () => {
+  console.log('🔍 userId usado en API:', userId); // DEBUG
+  try {
+    const res = await axios.get(`/api/seguidores/lista/${userId}`);
+    seguidores.value = res.data;
+    mostrarModalSeguidores.value = true;
+  } catch (error) {
+    console.error('Error al obtener seguidores:', error);
   }
 };
 

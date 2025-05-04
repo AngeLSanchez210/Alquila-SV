@@ -17,6 +17,7 @@ class Seguidor extends Model
     {
         return $this->belongsTo(User::class, 'seguidor_id');
     }
+    
 
     public function seguido()
     {

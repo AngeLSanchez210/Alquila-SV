@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Seguidor;
+use App\Models\User;
+
 
 class SeguidorController extends Controller
 {
@@ -61,4 +63,24 @@ class SeguidorController extends Controller
 
         return response()->json(['isFollowing' => $isFollowing], 200);
     }
+
+    public function listarSeguidores($userId)
+    {
+        
+        $seguidorIds = Seguidor::where('seguido_id', $userId)->pluck('seguidor_id');
+    
+      
+        $seguidores = User::whereIn('id', $seguidorIds)
+            ->select('id', 'name')
+            ->get();
+    
+       
+        return response()->json($seguidores);
+    }
+    
+    
+    
+    
+    
+    
 }
