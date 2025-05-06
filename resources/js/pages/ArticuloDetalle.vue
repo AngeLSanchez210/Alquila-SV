@@ -74,18 +74,40 @@ const agregarAFavoritos = async () => {
 };
 
 const agregarPuntuacion = async () => {
-  if (!user || !puntuacion.value) {
+  if (!user) {
     Swal.fire({
       icon: 'warning',
-      title: 'Debes iniciar sesión y proporcionar una puntuación',
-      text: 'Inicia sesión para agregar una puntuación al artículo.',
+      title: 'Inicia sesión',
+      text: 'Debes iniciar sesión para puntuar un artículo.'
     });
     return;
   }
 
+  if (!puntuacion.value) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Puntuación faltante',
+      text: 'Por favor, selecciona una puntuación antes de enviar.'
+    });
+    return;
+  }
+
+  const confirmacion = await Swal.fire({
+    icon: 'question',
+    title: '¿Ya alquilaste este artículo?',
+    text: 'Por favor, puntúa solo si ya alquilaste este artículo.',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, lo alquilé',
+    cancelButtonText: 'Cancelar',
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
   try {
+    const a = articulo.value;
+
     await axios.post('/puntuaciones', {
-      articulo_id: articulo.value.id,
+      articulo_id: a.id,
       puntuacion: puntuacion.value,
       comentario: comentario.value || "",
     });
@@ -93,25 +115,70 @@ const agregarPuntuacion = async () => {
     Swal.fire({
       icon: 'success',
       title: '¡Puntuación agregada!',
-      text: 'Tu puntuación se ha registrado correctamente.',
+      text: 'Gracias por tu calificación.'
     });
+
+    if (a.puntuaciones) {
+      a.puntuaciones.push({
+        id: Date.now(),
+        puntuacion: puntuacion.value,
+        comentario: comentario.value,
+        usuario: { name: user.name },
+        created_at: new Date().toISOString()
+      });
+    }
+
+    puntuacion.value = 0;
+    comentario.value = '';
+
   } catch (error) {
-    if (error.response && error.response.status === 409) {
+    if (error.response?.status === 409) {
       Swal.fire({
         icon: 'info',
         title: 'Ya puntuaste este artículo',
-        text: 'Solo puedes puntuar una vez por artículo.',
+        text: 'Solo puedes puntuar una vez por artículo.'
       });
     } else {
       console.error("Error al agregar puntuación:", error);
       Swal.fire({
         icon: 'error',
         title: '¡Error!',
-        text: 'Hubo un problema al guardar la puntuación. Intenta nuevamente.',
+        text: 'Hubo un problema al guardar la puntuación. Intenta nuevamente.'
       });
     }
   }
 };
+
+const validarYRedirigirWhatsapp = () => {
+  if (!user) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Inicia sesión',
+      text: 'Debes iniciar sesión para contactar por WhatsApp.'
+    });
+    return;
+  }
+
+  const telefono = articulo.value?.usuario?.telefono;
+  const nombre = articulo.value?.usuario?.name || '';
+  const nombreArticulo = articulo.value?.nombre || '';
+
+  if (!telefono || telefono.length !== 8 || !/^\d+$/.test(telefono)) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Número no disponible',
+      text: 'Este usuario no tiene un número de WhatsApp válido.'
+    });
+    return;
+  }
+
+  const mensaje = encodeURIComponent(`Hola ${nombre}, estoy interesad@ en tu artículo '${nombreArticulo}'. ¿Me podrías dar más información?`);
+  const link = `https://wa.me/503${telefono}?text=${mensaje}`;
+  window.open(link, '_blank');
+};
+
+
+
 </script>
 
 <template>
@@ -156,14 +223,13 @@ const agregarPuntuacion = async () => {
           </div>
 
           <!-- WhatsApp Contact -->
-          <a
-            v-if="articulo.usuario?.telefono && articulo.usuario.telefono.length === 8"
-            :href="`https://wa.me/503${articulo.usuario.telefono}?text=Hola ${articulo.usuario.name}, estoy interesad@ en tu artículo '${articulo.nombre}'. ¿Me podrías dar más información?`"
-            target="_blank"
-            class="inline-block w-full text-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-xl transition duration-300"
-          >
-            Contactar por WhatsApp
-          </a>
+          <button
+                  @click="validarYRedirigirWhatsapp"
+                  class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 rounded-xl transition mt-6"
+                >
+                  Contactar por WhatsApp
+          </button>
+
 
           <!-- Favoritos -->
           <button

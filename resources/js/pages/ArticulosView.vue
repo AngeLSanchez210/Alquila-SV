@@ -97,45 +97,81 @@ const agregarAFavoritos = async () => {
 };
 
 const agregarPuntuacion = async () => {
-  if (!user || !articuloSeleccionado.value || !puntuacion.value) {
-    Swal.fire({ icon: 'warning', title: 'Debes iniciar sesión y proporcionar una puntuación', text: 'Inicia sesión para agregar una puntuación al artículo.' });
+  if (!user) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Inicia sesión',
+      text: 'Debes iniciar sesión para puntuar un artículo.'
+    });
     return;
   }
+
+  if (!puntuacion.value) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Puntuación faltante',
+      text: 'Por favor, selecciona una puntuación antes de enviar.'
+    });
+    return;
+  }
+
+  const confirmacion = await Swal.fire({
+    icon: 'question',
+    title: '¿Ya alquilaste este artículo?',
+    text: 'Por favor, puntúa solo si ya alquilaste este artículo.',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, lo alquilé',
+    cancelButtonText: 'Cancelar',
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
   try {
-    const response = await axios.post('/puntuaciones', {
-      articulo_id: articuloSeleccionado.value.id,
+    const a = articuloSeleccionado.value;
+    await axios.post('/puntuaciones', {
+      articulo_id: a.id,
       puntuacion: puntuacion.value,
       comentario: comentario.value || "",
     });
 
-  
-    Swal.fire({ icon: 'success', title: '¡Puntuación agregada!', text: 'Tu puntuación se ha registrado correctamente.' });
+    Swal.fire({
+      icon: 'success',
+      title: '¡Puntuación agregada!',
+      text: 'Gracias por tu calificación.'
+    });
 
-    
-    articuloSeleccionado.value.puntuaciones = [
-      ...articuloSeleccionado.value.puntuaciones, 
-      {
-        id: Date.now(), 
+    if (a.puntuaciones) {
+      a.puntuaciones.push({
+        id: Date.now(),
         puntuacion: puntuacion.value,
         comentario: comentario.value,
         usuario: { name: user.name },
-        created_at: new Date().toISOString(), 
-      }
-    ];
+        created_at: new Date().toISOString()
+      });
+    }
 
-    // Limpiar inputs
     puntuacion.value = 0;
     comentario.value = '';
 
   } catch (error) {
     if (error.response?.status === 409) {
-      Swal.fire({ icon: 'info', title: 'Ya puntuaste este artículo', text: 'Solo puedes puntuar una vez por artículo.' });
+      Swal.fire({
+        icon: 'info',
+        title: 'Ya puntuaste este artículo',
+        text: 'Solo puedes puntuar una vez por artículo.'
+      });
     } else {
       console.error("Error al agregar puntuación:", error);
-      Swal.fire({ icon: 'error', title: '¡Error!', text: 'Hubo un problema al guardar la puntuación. Intenta nuevamente.' });
+      Swal.fire({
+        icon: 'error',
+        title: '¡Error!',
+        text: 'Hubo un problema al guardar la puntuación. Intenta nuevamente.'
+      });
     }
   }
 };
+
+
 
 
 const limpiarFiltros = () => {
@@ -158,6 +194,36 @@ const cerrarMiniModal = () => {
   mostrarMiniModal.value = false;
   imagenAmpliada.value = null;
 };
+
+
+const validarYRedirigirWhatsapp = () => {
+  if (!user) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Inicia sesión',
+      text: 'Debes iniciar sesión para contactar por WhatsApp.'
+    });
+    return;
+  }
+
+  const telefono = articuloSeleccionado.value?.usuario?.telefono;
+  const nombre = articuloSeleccionado.value?.usuario?.name || '';
+  const articulo = articuloSeleccionado.value?.nombre || '';
+
+  if (!telefono || telefono.length !== 8 || !/^\d+$/.test(telefono)) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Número no disponible',
+      text: 'Este usuario no tiene un número de WhatsApp válido.'
+    });
+    return;
+  }
+
+  const mensaje = encodeURIComponent(`Hola ${nombre}, estoy interesad@ en tu artículo '${articulo}'. ¿Me podrías dar más información?`);
+  const link = `https://wa.me/503${telefono}?text=${mensaje}`;
+  window.open(link, '_blank');
+};
+
 
 </script>
 
@@ -388,14 +454,14 @@ const cerrarMiniModal = () => {
           </div>
 
           <!-- WhatsApp -->
-          <a
-            v-if="articuloSeleccionado.usuario?.telefono"
-            :href="`https://wa.me/503${articuloSeleccionado.usuario.telefono}?text=Hola ${articuloSeleccionado.usuario.name}, estoy interesad@ en tu artículo '${articuloSeleccionado.nombre}'. ¿Me podrías dar más información?`"
-            target="_blank"
-            class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 rounded-xl transition mt-6"
-          >
-            Contactar por WhatsApp
-          </a>
+          <button
+                  @click="validarYRedirigirWhatsapp"
+                  class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 rounded-xl transition mt-6"
+                >
+                  Contactar por WhatsApp
+          </button>
+
+
 
           <!-- Botón de Favoritos -->
           <button
