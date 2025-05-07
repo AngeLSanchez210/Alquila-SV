@@ -1,57 +1,70 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { router } from '@inertiajs/vue3';
-import Header from '@/components/Header.vue';
-import Footer from '@/components/Footer.vue';
-import Swal from 'sweetalert2';
-import axios from 'axios';
+// Importamos cosas que vamos a usar
+import { ref } from 'vue'; 
+import { router } from '@inertiajs/vue3'; 
+import Header from '@/components/Header.vue'; 
+import Footer from '@/components/Footer.vue'; 
+import Swal from 'sweetalert2'; 
+import axios from 'axios'; 
 
+// Esta es la forma que tienen las categorías
 interface Categoria {
     id: number;
     nombre: string;
 }
 
+// Recibimos las categorías como prop
 const props = defineProps<{ categorias?: Categoria[] }>();
-const categorias = ref(props.categorias || []);
+const categorias = ref(props.categorias || []); // si no vienen, usamos un array vacío
 
+// Aquí guardamos todos los datos del formulario
 const form = ref({
-    nombre: '',
-    descripcion: '',
-    precio: '',
-    estado: 'disponible',
-    idcategoria: '',
-    imagenes: [] as File[],
-    tipo_precio: 'por día',
+    nombre: '', 
+    descripcion: '', 
+    precio: '', 
+    estado: 'disponible', 
+    idcategoria: '', 
+    imagenes: [] as File[], // imágenes que se van a subir
+    tipo_precio: 'por día', // por día o por mes
 });
 
+// Esto es para poder limpiar el input de archivos después de guardar
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
+// funcion al seleccionar archivos
 const onFileChange = (event: Event) => {
     const fileInput = event.target as HTMLInputElement;
+
+    //si los hay
     if (fileInput.files && fileInput.files.length > 0) {
-        const filesArray = Array.from(fileInput.files);
+        const filesArray = Array.from(fileInput.files); // convertimos a array
         const validFiles = filesArray.filter(file =>
-            file.type === 'image/jpeg' ||
-            file.type === 'image/png' ||
-            file.type === 'image/jfif' ||
-            file.type === 'image/webp'
+        //FORMATO DE IMÁGENES
+            file.type === 'image/jpeg' ||  // JPG
+            file.type === 'image/png' ||   // PNG
+            file.type === 'image/jfif' ||  // JFIF
+            file.type === 'image/webp'     // WEBP
         );
 
-
+        // Si hay archivos inválidos, mostramos alerta
         if (validFiles.length !== filesArray.length) {
             Swal.fire({
                 icon: 'error',
                 title: 'Archivo no permitido',
-                text: 'Solo puedes subir imágenes JPG o PNG.',
+                text: 'Solo puedes subir imágenes JPG, PNG, JFIF o WEBP.',
             });
         }
 
+        // Guardamos solo los archivos válidos en el formulario
         form.value.imagenes = validFiles;
     }
 };
 
+
 const submit = () => {
-    const formData = new FormData();
+    const formData = new FormData(); // usamos FormData para mandar imágenes
+
+    // Agregamos los campos normales
     formData.append('nombre', form.value.nombre);
     const descripcionCompleta = `${form.value.descripcion}\n\n**Precio ${form.value.tipo_precio.toUpperCase()}**`;
     formData.append('descripcion', descripcionCompleta);
@@ -59,12 +72,15 @@ const submit = () => {
     formData.append('estado', form.value.estado);
     formData.append('idcategoria', form.value.idcategoria);
 
+    // Agregamos cada imagen si son varias
     form.value.imagenes.forEach((imagen, index) => {
         formData.append(`imagenes[${index}]`, imagen);
     });
 
+    // Enviamos el formulario al backend
     axios.post('/articulos', formData)
         .then(() => {
+            // Si todo salió bien, mostramos una alerta con opciones
             Swal.fire({
                 title: '¡Artículo guardado!',
                 text: '¿Deseas agregar otro artículo o volver al inicio?',
@@ -76,6 +92,7 @@ const submit = () => {
                 cancelButtonColor: '#3b82f6',
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Si elige agregar otro, limpiamos el formulario
                     form.value = {
                         nombre: '',
                         descripcion: '',
@@ -85,13 +102,16 @@ const submit = () => {
                         imagenes: [],
                         tipo_precio: 'por día'
                     };
+                    // También limpiamos el input de archivos
                     if (fileInputRef.value) fileInputRef.value.value = '';
                 } else {
+                    // Si no, lo mandamos al inicio
                     router.visit('/');
                 }
             });
         })
         .catch((error) => {
+            // Si hay error, lo manejamos según el tipo
             const status = error.response?.status;
             const errorMsg = error.response?.data?.error || 'Hubo un problema al guardar el artículo.';
 
@@ -120,6 +140,7 @@ const submit = () => {
         });
 };
 </script>
+
 
 <template>
   <Header />

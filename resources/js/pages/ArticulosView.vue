@@ -11,28 +11,34 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-const priceInput = ref(1000);
-const priceRange = ref(1000);
-const mostrarModal = ref(false);
-const articuloSeleccionado = ref(null);
-const puntuacion = ref(0);
-const comentario = ref('');
-const articulos = ref([]);
-const pagination = ref({}); 
-const isLoading = ref(false);
-const user = usePage().props.auth.user;
+const priceInput = ref(1000); // valor del input de precio
+const priceRange = ref(1000); // valor del slider de precio
+const mostrarModal = ref(false); // controla si se muestra el modal de detalles
+const articuloSeleccionado = ref(null); // artículo que se está viendo en detalle
+const puntuacion = ref(0); // puntuación seleccionada por el usuario
+const comentario = ref(''); // comentario del usuario
+const articulos = ref([]); // lista de artículos filtrados
+const pagination = ref({}); // datos de paginación recibidos del backend
+const isLoading = ref(false); // bandera para mostrar loading
+const user = usePage().props.auth.user; // usuario autenticado
 
+// Lista de categorías fijas
 const categorias = ref([
-  'Herramientas', 'Electrodomésticos', 'Vehículos', 'Ropa y disfraces', 'Deportes', 'Tecnología', 'Muebles', 'Juguetes', 'Jardinería', 'Cámaras y fotografía', 'Audio y video', 'Camping', 'Fiestas y eventos', 'Musicales e instrumentos', 'Oficina', 'Bebés y niños', 'Libros y revistas', 'Gaming', 'Accesorios para autos', 'Maquinaria pesada', 'Artículos de cocina', 'Decoración', 'Fitness y ejercicio', 'Moda y accesorios', 'Fotocabinas', 'Espacios para reuniones', 'Drones', 'Patinetas y bicis', 'Artículos de limpieza', 'Carpas y toldos'
+  'Herramientas', 'Electrodomésticos', 'Vehículos', 'Ropa y disfraces', 'Deportes', 'Tecnología', 'Muebles',
+  'Juguetes', 'Jardinería', 'Cámaras y fotografía', 'Audio y video', 'Camping', 'Fiestas y eventos',
+  'Musicales e instrumentos', 'Oficina', 'Bebés y niños', 'Libros y revistas', 'Gaming', 'Accesorios para autos',
+  'Maquinaria pesada', 'Artículos de cocina', 'Decoración', 'Fitness y ejercicio', 'Moda y accesorios',
+  'Fotocabinas', 'Espacios para reuniones', 'Drones', 'Patinetas y bicis', 'Artículos de limpieza', 'Carpas y toldos'
 ]);
 
-const categoriasSeleccionadas = ref({});
-const soloDestacados = ref(false);
-const paginaActual = ref(1);
+const categoriasSeleccionadas = ref({}); // objeto para rastrear las categorías seleccionadas
+const soloDestacados = ref(false); // para filtrar solo artículos destacados
+const paginaActual = ref(1); // página actual para paginación
 
+// Inicializa las categorías como no seleccionadas
 categorias.value.forEach(cat => categoriasSeleccionadas.value[cat] = false);
 
-// Leer categoría desde la URL y marcarla
+// Lee la categoría desde la URL si viene con ?categoria=nombre
 const page = usePage();
 const routeParams = page.url.split('?')[1];
 const urlParams = new URLSearchParams(routeParams);
@@ -41,6 +47,7 @@ if (categoriaDesdeURL && categoriasSeleccionadas.value.hasOwnProperty(categoriaD
   categoriasSeleccionadas.value[categoriaDesdeURL] = true;
 }
 
+// Actualiza el precio desde input o slider (valida de 0 a 1000)
 const updatePrice = (value) => {
   const maxPrice = 1000;
   const numericValue = Math.min(Math.max(value, 0), maxPrice);
@@ -48,11 +55,13 @@ const updatePrice = (value) => {
   priceRange.value = numericValue;
 };
 
+// Refetch al cambiar filtros
 watch([priceRange, categoriasSeleccionadas, soloDestacados], () => {
   paginaActual.value = 1;
   fetchArticulos();
 }, { deep: true });
 
+// Obtener artículos del backend según filtros
 const fetchArticulos = async () => {
   isLoading.value = true;
   try {
@@ -69,8 +78,8 @@ const fetchArticulos = async () => {
     if (soloDestacados.value) params.destacados = true;
 
     const response = await axios.get('/api/articulos', { params });
-    articulos.value = response.data.data; 
-    pagination.value = response.data;   
+    articulos.value = response.data.data;
+    pagination.value = response.data;
   } catch (error) {
     console.error('Error al obtener los artículos:', error);
   } finally {
@@ -78,12 +87,11 @@ const fetchArticulos = async () => {
   }
 };
 
-
-
+// Abre el modal con los detalles de un artículo
 const abrirDetalles = async (articulo) => {
   try {
-    const response = await axios.get(`/api/articulos/${articulo.id}`); // Aquí haces el fetch por ID
-    articuloSeleccionado.value = response.data.articulo; // Ahora sí con puntuaciones cargadas
+    const response = await axios.get(`/api/articulos/${articulo.id}`);
+    articuloSeleccionado.value = response.data.articulo;
     mostrarModal.value = true;
   } catch (error) {
     console.error('Error al cargar el artículo:', error);
@@ -95,10 +103,20 @@ const abrirDetalles = async (articulo) => {
   }
 };
 
-const cerrarModal = () => { mostrarModal.value = false; };
-onMounted(() => { fetchArticulos(); });
+// Cierra el modal de detalles
+const cerrarModal = () => {
+  mostrarModal.value = false;
+};
+
+// Ejecuta fetchArticulos al cargar la página
+onMounted(() => {
+  fetchArticulos();
+});
+
+// Incluye cookies en las peticiones (útil para auth)
 axios.defaults.withCredentials = true;
 
+// Agrega un artículo a favoritos
 const agregarAFavoritos = async () => {
   if (!user || !articuloSeleccionado.value) {
     Swal.fire({ icon: 'warning', title: 'Debes iniciar sesión', text: 'Inicia sesión para agregar el artículo a tus favoritos.' });
@@ -113,22 +131,15 @@ const agregarAFavoritos = async () => {
   }
 };
 
+// Envía una puntuación y comentario para un artículo
 const agregarPuntuacion = async () => {
   if (!user) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Inicia sesión',
-      text: 'Debes iniciar sesión para puntuar un artículo.'
-    });
+    Swal.fire({ icon: 'warning', title: 'Inicia sesión', text: 'Debes iniciar sesión para puntuar un artículo.' });
     return;
   }
 
   if (!puntuacion.value) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Puntuación faltante',
-      text: 'Por favor, selecciona una puntuación antes de enviar.'
-    });
+    Swal.fire({ icon: 'warning', title: 'Puntuación faltante', text: 'Por favor, selecciona una puntuación antes de enviar.' });
     return;
   }
 
@@ -151,11 +162,7 @@ const agregarPuntuacion = async () => {
       comentario: comentario.value || "",
     });
 
-    Swal.fire({
-      icon: 'success',
-      title: '¡Puntuación agregada!',
-      text: 'Gracias por tu calificación.'
-    });
+    Swal.fire({ icon: 'success', title: '¡Puntuación agregada!', text: 'Gracias por tu calificación.' });
 
     if (a.puntuaciones) {
       a.puntuaciones.push({
@@ -172,33 +179,24 @@ const agregarPuntuacion = async () => {
 
   } catch (error) {
     if (error.response?.status === 409) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Ya puntuaste este artículo',
-        text: 'Solo puedes puntuar una vez por artículo.'
-      });
+      Swal.fire({ icon: 'info', title: 'Ya puntuaste este artículo', text: 'Solo puedes puntuar una vez por artículo.' });
     } else {
       console.error("Error al agregar puntuación:", error);
-      Swal.fire({
-        icon: 'error',
-        title: '¡Error!',
-        text: 'Hubo un problema al guardar la puntuación. Intenta nuevamente.'
-      });
+      Swal.fire({ icon: 'error', title: '¡Error!', text: 'Hubo un problema al guardar la puntuación. Intenta nuevamente.' });
     }
   }
 };
 
-
-
-
+// Limpia todos los filtros seleccionados
 const limpiarFiltros = () => {
   priceInput.value = 1000;
   priceRange.value = 1000;
-  Object.keys(categoriasSeleccionadas.value).forEach(cat => { categoriasSeleccionadas.value[cat] = false; });
+  Object.keys(categoriasSeleccionadas.value).forEach(cat => {
+    categoriasSeleccionadas.value[cat] = false;
+  });
 };
 
-
-// --- Mini Modal Imagen ---
+// Mini modal para ampliar imagen
 const imagenAmpliada = ref(null);
 const mostrarMiniModal = ref(false);
 
@@ -212,14 +210,10 @@ const cerrarMiniModal = () => {
   imagenAmpliada.value = null;
 };
 
-
+// Verifica sesión y redirige a WhatsApp del dueño del artículo
 const validarYRedirigirWhatsapp = () => {
   if (!user) {
-    Swal.fire({
-      icon: 'info',
-      title: 'Inicia sesión',
-      text: 'Debes iniciar sesión para contactar por WhatsApp.'
-    });
+    Swal.fire({ icon: 'info', title: 'Inicia sesión', text: 'Debes iniciar sesión para contactar por WhatsApp.' });
     return;
   }
 
@@ -228,11 +222,7 @@ const validarYRedirigirWhatsapp = () => {
   const articulo = articuloSeleccionado.value?.nombre || '';
 
   if (!telefono || telefono.length !== 8 || !/^\d+$/.test(telefono)) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Número no disponible',
-      text: 'Este usuario no tiene un número de WhatsApp válido.'
-    });
+    Swal.fire({ icon: 'warning', title: 'Número no disponible', text: 'Este usuario no tiene un número de WhatsApp válido.' });
     return;
   }
 
@@ -240,7 +230,6 @@ const validarYRedirigirWhatsapp = () => {
   const link = `https://wa.me/503${telefono}?text=${mensaje}`;
   window.open(link, '_blank');
 };
-
 
 </script>
 
