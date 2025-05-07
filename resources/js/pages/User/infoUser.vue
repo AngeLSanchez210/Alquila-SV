@@ -15,6 +15,10 @@ const verArticulo = (id: number) => {
   router.visit(`/articulos/ver/${id}`);
 };
 
+const verPerfil = (id: number) => {
+  router.visit(`/profile/${id}`);
+};
+
 
 const props = defineProps<{ user: User }>();
 
@@ -185,6 +189,19 @@ const fetchUserImage = async () => {
   }
 };
 
+const fetchFollowinImage = async (id_following) => {
+  const followingImage = ref(null);
+  console.log(id_following);
+  
+  try {
+    const response = await axios.get(`/api/users/${id_following}/image`);
+    followingImage.value = response.data.image_url;
+  } catch (error) {
+    console.error('Error al cargar la imagen del usuario:', error);
+  }
+  return followingImage.value;
+};
+
 const uploadUserImage = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
@@ -238,6 +255,22 @@ const abrirModalPlanes = () => {
 
 const cerrarModalPlanes = () => {
   mostrarModalPlanes.value = false;
+};
+
+const siguiendo = ref([]);
+
+const fetchSiguiendo = async () => {
+  try {
+    const response = await axios.get(`/api/seguidores/lista/${props.user.id}`);
+    siguiendo.value = await Promise.all(
+      response.data.map(async (persona) => ({
+        ...persona,
+        image: persona.image || `/storage/${(await fetchFollowinImage(persona.id))}`, // Esperar a que fetchFollowinImage se resuelva
+      }))
+    );
+  } catch (error) {
+    console.error('Error al cargar las personas que sigues:', error);
+  }
 };
 
 onMounted(() => {
@@ -307,6 +340,13 @@ const cerrarImagenModal = () => {
             @click="setActiveSection('planuser')"
           >
             Mis suscripciones
+          </button>
+          <button
+            class="block w-full text-left text-gray-700 font-medium hover:text-blue-500 transition-colors duration-200"
+            :class="{ 'text-blue-500 font-semibold': activeSection === 'siguiendo' }"
+            @click="setActiveSection('siguiendo'); fetchSiguiendo()"
+          >
+            Personas que sigo
           </button>
         </nav>
       </aside>
@@ -604,6 +644,31 @@ const cerrarImagenModal = () => {
             </div>
           </div>
         </div>
+
+        <!-- Nueva sección: Personas que sigo -->
+        <section
+          v-if="activeSection === 'siguiendo'"
+          class="bg-white p-6 rounded-lg shadow-md mb-auto"
+        >
+          <h2 class="text-2xl font-bold mb-4 text-gray-700">Personas que sigues</h2>
+          <ul v-if="siguiendo.length" class="space-y-4">
+            <li
+              v-for="persona in siguiendo"
+              :key="persona.id"
+              @click="verPerfil(persona.id)"
+              class="flex items-center gap-4 hover:bg-gray-100 p-2 rounded-lg cursor-pointer transition"
+            >
+              <img
+                :src="persona.image || '/images/default-user.svg'"
+                alt="Imagen del usuario"
+                class="w-12 h-12 object-cover rounded-full border"
+                @error="persona.image = '/images/default-user.svg'"
+              />
+              <span class="text-gray-800 font-medium">{{ persona.name }}</span>
+            </li>
+          </ul>
+          <p v-else class="text-gray-500 text-center">No sigues a nadie aún.</p>
+        </section>
       </section>
     </div>
     <div v-if="mostrarImagenModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
