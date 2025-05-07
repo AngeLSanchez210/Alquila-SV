@@ -91,6 +91,19 @@ const logout = async () => {
   }
 };
 
+
+const userImage = ref(null);
+
+const fetchUserImage = async () => {
+  try {
+    const userId = props.auth.user.id;
+    const response = await axios.get(`/api/users/${userId}/image`);
+    userImage.value = response.data.image_url;
+  } catch (error) {
+    console.error('Error al cargar la imagen del usuario:', error);
+  }
+};
+fetchUserImage();
 </script>
 
 <template>
@@ -208,12 +221,21 @@ const logout = async () => {
               <div v-if="props.auth.user" class="relative">
                 <!-- Imagen de perfil -->
                 <img
-                  alt="tania andrew"
-                  src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=1480&amp;q=80"
+                  alt="Imagen de perfil"
+                  v-if="userImage"
+                  :src="`/storage/${userImage}`"
                   class="relative inline-block h-9 w-9 cursor-pointer rounded-full object-cover object-center"
                   data-popover-target="profile-menu"
                   @click="toggleMenu"
                 />
+                <div
+                  v-else
+                  class="relative inline-block h-9 w-9 cursor-pointer rounded-full bg-gray-100 flex items-center justify-center text-gray-500"
+                  data-popover-target="profile-menu"
+                  @click="toggleMenu"
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-icon lucide-user-round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+                </div>
                 <ul
                   id="profile-menu"
                   role="menu"
