@@ -64,6 +64,10 @@ Route::get('/articulos', function () {
 // Ruta para obtener el JSON de los artículos
 Route::get('/api/articulos', [ArticuloController::class, 'index'])->name('api.articulos');
 
+Route::get('/articulos-todos', [ArticuloController::class, 'indexSinPaginacion']);
+
+
+
 // Ruta para crear un nuevo artículo
 Route::get('/articulos/create', [ArticuloController::class, 'create'])->middleware(['auth', 'verified'])->name('articulos.create');
 
@@ -103,6 +107,8 @@ Route::middleware([Denegade::class, 'verified'])->group(function () {
     Route::get('/api/favoritos', [FavoritoController::class, 'index'])->name('api.favoritos');
     Route::post('/api/favoritos', [FavoritoController::class, 'store'])->name('favoritos.store');
     Route::delete('/favoritos/{favorito}', [FavoritoController::class, 'destroy'])->name('favoritos.destroy');
+    Route::post('/puntuaciones', [PuntuacionController::class, 'store'])->name('puntuaciones.store');
+    Route::get('/puntuaciones/{articuloId}/{userId}', [PuntuacionController::class, 'verificarPuntuacion']);
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -123,8 +129,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/pagos', [PagoController::class, 'store'])->name('pagos.store');
 });
 
-Route::post('/puntuaciones', [PuntuacionController::class, 'store'])->name('puntuaciones.store');
-Route::get('/puntuaciones/{articuloId}/{userId}', [PuntuacionController::class, 'verificarPuntuacion']);
+
 
 
 // Ruta para ver el detalle de un solo artículo

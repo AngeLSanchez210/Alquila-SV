@@ -12,7 +12,24 @@ interface Articulo {
   imagenes: { id: number; link: string }[];
 }
 
-const articulos = ref<Articulo[]>([]);
+interface Paginacion<T> {
+  current_page: number;
+  data: T[];
+  first_page_url: string;
+  from: number | null;
+  last_page: number;
+  last_page_url: string;
+  links: any[];
+  next_page_url: string | null;
+  path: string;
+  per_page: number;
+  prev_page_url: string | null;
+  to: number | null;
+  total: number;
+}
+
+const articulos = ref<Paginacion<Articulo>>({} as Paginacion<Articulo>);
+
 const search = ref('');
 
 onMounted(async () => {
@@ -26,10 +43,15 @@ onMounted(async () => {
 
 const articulosFiltrados = computed(() => {
   const term = search.value.toLowerCase();
-  return articulos.value.filter(articulo =>
+
+  // Si aún no se ha cargado la respuesta, evita errores
+  if (!Array.isArray(articulos.value.data)) return [];
+
+  return articulos.value.data.filter(articulo =>
     articulo.nombre.toLowerCase().includes(term)
   );
 });
+
 
 const deleteArticulo = async (id: number) => {
   const result = await Swal.fire({
@@ -46,13 +68,14 @@ const deleteArticulo = async (id: number) => {
   if (result.isConfirmed) {
     try {
       await axios.delete(`/api/articulos/${id}`);
-      articulos.value = articulos.value.filter(a => a.id !== id);
+      articulos.value.data = articulos.value.data.filter(a => a.id !== id);
       await Swal.fire('Eliminado', 'El artículo fue eliminado correctamente.', 'success');
     } catch (error) {
       Swal.fire('Error', 'No se pudo eliminar el artículo.', 'error');
     }
   }
 };
+
 
 const imagenSeleccionada = ref<string | null>(null);
 const mostrarModalImagen = ref(false);

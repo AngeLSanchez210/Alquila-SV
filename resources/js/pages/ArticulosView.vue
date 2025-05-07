@@ -18,6 +18,7 @@ const articuloSeleccionado = ref(null);
 const puntuacion = ref(0);
 const comentario = ref('');
 const articulos = ref([]);
+const pagination = ref({}); 
 const isLoading = ref(false);
 const user = usePage().props.auth.user;
 
@@ -26,6 +27,9 @@ const categorias = ref([
 ]);
 
 const categoriasSeleccionadas = ref({});
+const soloDestacados = ref(false);
+const paginaActual = ref(1);
+
 categorias.value.forEach(cat => categoriasSeleccionadas.value[cat] = false);
 
 // Leer categoría desde la URL y marcarla
@@ -44,24 +48,37 @@ const updatePrice = (value) => {
   priceRange.value = numericValue;
 };
 
-watch([priceRange, categoriasSeleccionadas], () => {
+watch([priceRange, categoriasSeleccionadas, soloDestacados], () => {
+  paginaActual.value = 1;
   fetchArticulos();
 }, { deep: true });
 
 const fetchArticulos = async () => {
   isLoading.value = true;
   try {
-    const params = { precio_max: priceRange.value };
-    const categoriasActivas = Object.entries(categoriasSeleccionadas.value).filter(([_, isSelected]) => isSelected).map(([nombre]) => nombre);
+    const params = { 
+      precio_max: priceRange.value,
+      page: paginaActual.value
+    };
+
+    const categoriasActivas = Object.entries(categoriasSeleccionadas.value)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([nombre]) => nombre);
+
     if (categoriasActivas.length > 0) params.categorias = categoriasActivas;
+    if (soloDestacados.value) params.destacados = true;
+
     const response = await axios.get('/api/articulos', { params });
-    articulos.value = response.data;
+    articulos.value = response.data.data; 
+    pagination.value = response.data;   
   } catch (error) {
     console.error('Error al obtener los artículos:', error);
   } finally {
     isLoading.value = false;
   }
 };
+
+
 
 const abrirDetalles = async (articulo) => {
   try {
@@ -276,6 +293,18 @@ const validarYRedirigirWhatsapp = () => {
           </div>
         </div>
       </div>
+      <!-- Checkbox para artículos destacados -->
+        <div class="pt-4 border-t">
+          <label class="flex items-center gap-2">
+            <input 
+              type="checkbox"
+              v-model="soloDestacados"
+              class="h-4 w-4 text-indigo-600 rounded"
+            />
+            <span class="text-sm">Solo destacados</span>
+          </label>
+        </div>
+
 
       <!-- Categorías -->
       <div class="border-t pt-6">
@@ -360,9 +389,48 @@ const validarYRedirigirWhatsapp = () => {
             </div>
           </div>
         </div>
+
+        <!-- Paginación -->
+        <div v-if="pagination.last_page > 1" class="mt-12 px-4 pb-16">
+              <div class="flex justify-center space-x-2">
+                <button
+                  @click="paginaActual = Math.max(1, paginaActual - 1); fetchArticulos()"
+                  :disabled="paginaActual === 1"
+                  class="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed bg-white text-indigo-600 border-indigo-600"
+                >
+                  Anterior
+                </button>
+
+                <button
+                  v-for="page in pagination.last_page"
+                  :key="page"
+                  @click="paginaActual = page; fetchArticulos()"
+                  :class="[
+                    'px-4 py-2 rounded border',
+                    page === pagination.current_page
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-white text-indigo-600 border-indigo-600'
+                  ]"
+                >
+                  {{ page }}
+                </button>
+
+                <button
+                  @click="paginaActual = Math.min(pagination.last_page, paginaActual + 1); fetchArticulos()"
+                  :disabled="paginaActual === pagination.last_page"
+                  class="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed bg-white text-indigo-600 border-indigo-600"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
+
+
       </div>
     </div>
   </section>
+
+
 
  <!-- Modal Detalles -->
 <div v-if="mostrarModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

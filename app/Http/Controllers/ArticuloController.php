@@ -14,38 +14,81 @@ use Inertia\Inertia;
 class ArticuloController extends Controller
 {
     public function index(Request $request)
-{
-    $query = Articulo::with('imagenes', 'usuario', 'categoria')
-        ->with(['usuario.suscripciones.plan']) // precargar para evitar N+1
-
-        ->withCount(['usuario as es_destacado' => function ($q) {
-            $q->whereHas('suscripciones', function ($s) {
-                $s->where('estado', 'activa')
-                  ->whereHas('plan', function ($p) {
-                      $p->where('destacar', true);
-                  });
+    {
+        $query = Articulo::with('imagenes', 'usuario', 'categoria')
+            ->with(['usuario.suscripciones.plan']) 
+            ->withCount(['usuario as es_destacado' => function ($q) {
+                $q->whereHas('suscripciones', function ($s) {
+                    $s->where('estado', 'activa')
+                      ->whereHas('plan', function ($p) {
+                          $p->where('destacar', true);
+                      });
+                });
+            }]);
+    
+        // Filtro por precio máximo
+        if ($request->has('precio_max') && is_numeric($request->precio_max)) {
+            $query->where('precio', '<=', $request->precio_max);
+        }
+    
+        // Filtro por categorías seleccionadas
+        if ($request->has('categorias') && is_array($request->categorias) && count($request->categorias) > 0) {
+            $query->whereHas('categoria', function ($q) use ($request) {
+                $q->whereIn('nombre', $request->categorias);
             });
-        }]);
-
-
-    if ($request->has('precio_max') && is_numeric($request->precio_max)) {
-        $query->where('precio', '<=', $request->precio_max);
+        }
+    
+        // Filtro por destacados
+        if ($request->has('destacados') && $request->destacados) {
+            $query->having('es_destacado', '>', 0);
+            $query->groupBy('articulos.id');
+        }
+    
+        // Ordenar con prioridad a los destacados
+        $query->orderByDesc('es_destacado');
+    
+        // Obtener resultados
+        $articulos = $query->paginate(9); // En vez de ->get()
+        return response()->json($articulos);
     }
+ 
 
-
-    if ($request->has('categorias') && is_array($request->categorias) && count($request->categorias) > 0) {
-        $query->whereHas('categoria', function($q) use ($request) {
-            $q->whereIn('nombre', $request->categorias);
-        });
+    public function indexSinPaginacion(Request $request)
+    {
+        $query = Articulo::with('imagenes', 'usuario', 'categoria')
+            ->with(['usuario.suscripciones.plan'])
+            ->withCount(['usuario as es_destacado' => function ($q) {
+                $q->whereHas('suscripciones', function ($s) {
+                    $s->where('estado', 'activa')
+                      ->whereHas('plan', function ($p) {
+                          $p->where('destacar', true);
+                      });
+                });
+            }]);
+    
+        // Puedes usar los mismos filtros si quieres
+        if ($request->has('precio_max') && is_numeric($request->precio_max)) {
+            $query->where('precio', '<=', $request->precio_max);
+        }
+    
+        if ($request->has('categorias') && is_array($request->categorias) && count($request->categorias) > 0) {
+            $query->whereHas('categoria', function ($q) use ($request) {
+                $q->whereIn('nombre', $request->categorias);
+            });
+        }
+    
+        if ($request->has('destacados') && $request->destacados) {
+            $query->having('es_destacado', '>', 0);
+            $query->groupBy('articulos.id');
+        }
+    
+        $query->orderByDesc('es_destacado');
+    
+        return response()->json($query->get());
     }
+       
+    
 
-   
-    $query->orderByDesc('es_destacado');
-
-    $articulos = $query->get();
-
-    return response()->json($articulos);
-}
 
 
     public function vista()
