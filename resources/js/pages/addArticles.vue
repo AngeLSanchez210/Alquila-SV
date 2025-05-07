@@ -31,8 +31,12 @@ const onFileChange = (event: Event) => {
     if (fileInput.files && fileInput.files.length > 0) {
         const filesArray = Array.from(fileInput.files);
         const validFiles = filesArray.filter(file =>
-            file.type === 'image/jpeg' || file.type === 'image/png'
+            file.type === 'image/jpeg' ||
+            file.type === 'image/png' ||
+            file.type === 'image/jfif' ||
+            file.type === 'image/webp'
         );
+
 
         if (validFiles.length !== filesArray.length) {
             Swal.fire({
@@ -175,10 +179,10 @@ const submit = () => {
           <input
             type="file"
             ref="fileInputRef"
-            accept="image/jpeg, image/png"
+            accept="image/jpeg, image/png, image/jfif, image/webp"
             @change="onFileChange"
             multiple
-            class="p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none bg-white text-gray-800"
+            class="..."
           >
         </div>
 

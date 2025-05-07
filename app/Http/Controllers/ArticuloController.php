@@ -149,7 +149,7 @@ class ArticuloController extends Controller
             'precio' => 'required|numeric',
             'estado' => 'required|in:disponible,alquilado',
             'idcategoria' => 'nullable|exists:categorias,id',
-            'imagenes.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'imagenes.*' => 'image|mimes:jpeg,png,jpg,webp,jfif|max:2048',
         ]);
 
         $articulo = Articulo::create([
