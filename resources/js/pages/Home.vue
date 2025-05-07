@@ -239,7 +239,7 @@ onMounted(async () => {
               ? 'bg-indigo-500 text-white hover:bg-indigo-400 focus-visible:outline-indigo-500'
               : 'text-indigo-600 ring-1 ring-indigo-200 ring-inset hover:ring-indigo-300 focus-visible:outline-indigo-600'"
           >
-            {{ plan.precio === Math.max(...planes.map(p => p.precio)) ? 'Contactar ventas' : 'Comenzar ahora' }}
+            {{ plan.precio === Math.max(...planes.map(p => p.precio)) ? 'Adquirir premiun' : 'Comenzar ahora' }}
           </a>
         </div>
       </div>

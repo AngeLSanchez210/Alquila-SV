@@ -100,7 +100,7 @@ const fetchUserImage = async () => {
     const response = await axios.get(`/api/users/${userId}/image`);
     userImage.value = response.data.image_url;
   } catch (error) {
-    console.error('Error al cargar la imagen del usuario:', error);
+    //console.error('Error al cargar la imagen del usuario:', error);
   }
 };
 fetchUserImage();

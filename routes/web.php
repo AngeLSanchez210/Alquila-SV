@@ -211,3 +211,5 @@ Route::get('/api/users/{user}/suscripcion-activa', [SuscripcionController::class
 Route::get('/api/seguidores/lista/{userId}', [SeguidorController::class, 'listarSeguidores']);
 
 Route::get('/api/seguidores/{seguidor_id}/{seguido_id}', [SeguidorController::class, 'checkFollowing']);
+
+Route::get('/api/seguidos/lista/{userId}', [App\Http\Controllers\SeguidorController::class, 'listarSeguidos']);

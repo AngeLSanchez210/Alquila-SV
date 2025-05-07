@@ -171,9 +171,12 @@ const buttonClass = computed(() =>
 );
 
 const page = usePage();
-const loggedInUserId = page.props.auth.user.id;
+const loggedInUserId = page.props.auth?.user?.id || null; // Validación para evitar errores si no existe
 
 const follow = async () => {
+  if (!loggedInUserId) {
+    return router.visit('/login'); // Redirige al login si no está autenticado
+  }
   if (loggedInUserId === userId) return alert('No puedes seguirte a ti mismo.');
   try {
     const res = await axios.post('/seguir', {
@@ -188,6 +191,9 @@ const follow = async () => {
 };
 
 const unfollow = async () => {
+  if (!loggedInUserId) {
+    return router.visit('/login'); // Redirige al login si no está autenticado
+  }
   try {
     const res = await axios.post('/dejar-seguir', {
       seguidor_id: loggedInUserId,

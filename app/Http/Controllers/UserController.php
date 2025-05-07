@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Suscripcion;
+use App\Models\Plan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -28,7 +31,23 @@ class UserController extends Controller
 
         $validated['password'] = Hash::make($validated['password']);
 
-        User::create($validated);
+        $user = User::create($validated);
+
+        // Obtener el plan con id = 1
+        $plan = Plan::find(1);
+        if (!$plan) {
+            return response()->json(['error' => 'Plan no encontrado.'], 404);
+        }
+
+        // Crear suscripción por defecto al plan con id = 1
+        Suscripcion::create([
+            'usuario_id' => $user->id,
+            'plan_id' => $plan->id,
+            'pago_id' => null, 
+            'fecha_inicio' => Carbon::now(),
+            'fecha_fin' => Carbon::now()->addDays($plan->duracion), // Duración dinámica del plan
+            'estado' => 'activa',
+        ]);
 
         return response()->json(['message' => 'Usuario creado correctamente'], 201);
     }

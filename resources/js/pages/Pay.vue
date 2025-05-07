@@ -146,15 +146,16 @@ const pagarConPaypal = async () => {
       transaccion_id: generarTransaccionId(),
     });
     Swal.fire('Pago Exitoso', 'Tu pago se ha procesado correctamente.', 'success');
+    window.location.href = '/user/7?section=planuser'; // Redirección después del pago
   } catch (error) {
-  if (error.response?.status === 400) {
-    Swal.fire('Error', error.response.data.error, 'error'); // Mostrar mensaje del backend
-  } else if (error.response?.status === 500) {
-    Swal.fire('Error Interno', `${error.response.data.error} (Línea: ${error.response.data.line})`, 'error'); 
-  } else {
-    Swal.fire('Error', 'Error desconocido al procesar el pago.', 'error');
-  }
-  
+    if (error.response?.status === 400) {
+      Swal.fire('Error', error.response.data.error, 'error'); // Mostrar mensaje del backend
+    } else if (error.response?.status === 500) {
+      Swal.fire('Error Interno', `${error.response.data.error} (Línea: ${error.response.data.line})`, 'error'); 
+    } else {
+      Swal.fire('Error', 'Error desconocido al procesar el pago.', 'error');
+    }
+    
   }
 };
 
@@ -171,14 +172,15 @@ const pagarConTarjeta = async () => {
       transaccion_id: generarTransaccionId(),
     });
     Swal.fire('Pago Exitoso', 'Tu pago se ha procesado correctamente.', 'success');
+    window.location.href = '/user/7?section=planuser'; // Redirección después del pago
   } catch (error) {
-  if (error.response?.status === 400) {
-    Swal.fire('Error', error.response.data.error, 'error'); // Mostrar mensaje del backend
-  } else if (error.response?.status === 500) {
-    Swal.fire('Error Interno', `${error.response.data.error} (Línea: ${error.response.data.line})`, 'error'); 
-  } else {
-    Swal.fire('Error', 'Error desconocido al procesar el pago.', 'error');
-  }
+    if (error.response?.status === 400) {
+      Swal.fire('Error', error.response.data.error, 'error'); // Mostrar mensaje del backend
+    } else if (error.response?.status === 500) {
+      Swal.fire('Error Interno', `${error.response.data.error} (Línea: ${error.response.data.line})`, 'error'); 
+    } else {
+      Swal.fire('Error', 'Error desconocido al procesar el pago.', 'error');
+    }
   }
 
   

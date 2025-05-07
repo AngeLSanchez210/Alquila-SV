@@ -190,9 +190,7 @@ const fetchUserImage = async () => {
 };
 
 const fetchFollowinImage = async (id_following) => {
-  const followingImage = ref(null);
-  console.log(id_following);
-  
+  const followingImage = ref(null);  
   try {
     const response = await axios.get(`/api/users/${id_following}/image`);
     followingImage.value = response.data.image_url;
@@ -261,11 +259,31 @@ const siguiendo = ref([]);
 
 const fetchSiguiendo = async () => {
   try {
-    const response = await axios.get(`/api/seguidores/lista/${props.user.id}`);
+    const response = await axios.get(`/api/seguidos/lista/${props.user.id}`);
     siguiendo.value = await Promise.all(
       response.data.map(async (persona) => ({
         ...persona,
-        image: persona.image || `/storage/${(await fetchFollowinImage(persona.id))}`, // Esperar a que fetchFollowinImage se resuelva
+        image: (await fetchFollowinImage(persona.id)) 
+        ? `/storage/${await fetchFollowinImage(persona.id)}` 
+        : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="gray"><circle cx="12" cy="8" r="4"/><path d="M12 14c-5 0-9 2.5-9 5v1h18v-1c0-2.5-4-5-9-5z"/></svg>', // Esperar a que fetchFollowinImage se resuelva
+      }))
+    );
+  } catch (error) {
+    console.error('Error al cargar las personas que sigues:', error);
+  }
+};
+
+const seguidores = ref([]);
+
+const fetchSeguidores = async () => {
+  try {
+    const response = await axios.get(`/api/seguidos/lista/${props.user.id}`);
+    seguidores.value = await Promise.all(
+      response.data.map(async (persona) => ({
+        ...persona,
+        image: (await fetchFollowinImage(persona.id)) 
+        ? `/storage/${await fetchFollowinImage(persona.id)}` 
+        : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="gray"><circle cx="12" cy="8" r="4"/><path d="M12 14c-5 0-9 2.5-9 5v1h18v-1c0-2.5-4-5-9-5z"/></svg>', // Esperar a que fetchFollowinImage se resuelva
       }))
     );
   } catch (error) {
@@ -346,7 +364,14 @@ const cerrarImagenModal = () => {
             :class="{ 'text-blue-500 font-semibold': activeSection === 'siguiendo' }"
             @click="setActiveSection('siguiendo'); fetchSiguiendo()"
           >
-            Personas que sigo
+            Siguiendo
+          </button>
+          <button
+            class="block w-full text-left text-gray-700 font-medium hover:text-blue-500 transition-colors duration-200"
+            :class="{ 'text-blue-500 font-semibold': activeSection === 'seguidores' }"
+            @click="setActiveSection('seguidores'); fetchSiguiendo()"
+          >
+            Seguidores
           </button>
         </nav>
       </aside>
@@ -440,17 +465,16 @@ const cerrarImagenModal = () => {
           <ul class="space-y-4">
             <li v-for="articulo in articulos" :key="articulo.id" class="border-b pb-4 flex items-center gap-4">
               <img
-                      @click="verArticulo(articulo.id)"
-                      :src="'/storage/' + articulo.imagenes[0]?.link"
-                      alt="Imagen del artículo"
-                      class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition"
-                    />
-
-   
+                @click="verArticulo(articulo.id)"
+                :src="'/storage/' + articulo.imagenes[0]?.link"
+                alt="Imagen del artículo"
+                class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition"
+              />
               <div class="flex-1">
                 <h3 class="text-lg font-medium text-gray-900">{{ articulo.nombre }}</h3>
                 <p class="text-sm text-gray-600">{{ articulo.descripcion }}</p>
                 <p class="text-sm text-gray-600">Precio: ${{ articulo.precio }}</p>
+                <p class="text-sm text-gray-600">Estado: {{ articulo.estado }}</p>
               </div>
               <div class="flex gap-2">
                 <button @click="abrirModalEditar(articulo)" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Editar</button>
@@ -492,6 +516,13 @@ const cerrarImagenModal = () => {
                   </div>
                 </div>
                 <input type="file" multiple @change="agregarImagenes" class="mt-2 w-full border p-2 rounded">
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Estado</label>
+                <select v-model="articuloSeleccionado.estado" class="w-full border p-2 rounded">
+                  <option value="disponible">Disponible</option>
+                  <option value="alquilado">Alquilado</option>
+                </select>
               </div>
               <div class="flex justify-end gap-2">
                 <button type="button" @click="mostrarModal = false" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancelar</button>
@@ -638,14 +669,14 @@ const cerrarImagenModal = () => {
                     ? 'bg-indigo-500 text-white hover:bg-indigo-400 focus-visible:outline-indigo-500'
                     : 'text-indigo-600 ring-1 ring-indigo-200 ring-inset hover:ring-indigo-300 focus-visible:outline-indigo-600'"
                 >
-                  {{ plan.precio === Math.max(...planes.map(p => p.precio)) ? 'Contactar ventas' : 'Seleccionar Plan' }}
+                  {{ plan.precio === Math.max(...planes.map(p => p.precio)) ? 'Adquirir premiun' : 'Comenzar ahora' }}
                 </a>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Nueva sección: Personas que sigo -->
+        <!-- Personas que sigo -->
         <section
           v-if="activeSection === 'siguiendo'"
           class="bg-white p-6 rounded-lg shadow-md mb-auto"
@@ -659,7 +690,7 @@ const cerrarImagenModal = () => {
               class="flex items-center gap-4 hover:bg-gray-100 p-2 rounded-lg cursor-pointer transition"
             >
               <img
-                :src="persona.image || '/images/default-user.svg'"
+                :src="persona.image ? persona.image : '/images/user-icon.svg'"
                 alt="Imagen del usuario"
                 class="w-12 h-12 object-cover rounded-full border"
                 @error="persona.image = '/images/default-user.svg'"
@@ -668,6 +699,31 @@ const cerrarImagenModal = () => {
             </li>
           </ul>
           <p v-else class="text-gray-500 text-center">No sigues a nadie aún.</p>
+        </section>
+        
+        <!-- Personas que me siguen -->
+        <section
+          v-if="activeSection === 'seguidores'"
+          class="bg-white p-6 rounded-lg shadow-md mb-auto"
+        >
+          <h2 class="text-2xl font-bold mb-4 text-gray-700">Personas que te siguen</h2>
+          <ul v-if="seguidores.length" class="space-y-4">
+            <li
+              v-for="persona in seguidores"
+              :key="persona.id"
+              @click="verPerfil(persona.id)"
+              class="flex items-center gap-4 hover:bg-gray-100 p-2 rounded-lg cursor-pointer transition"
+            >
+              <img
+                :src="persona.image ? persona.image : '/images/user-icon.svg'"
+                alt="Imagen del usuario"
+                class="w-12 h-12 object-cover rounded-full border"
+                @error="persona.image = '/images/default-user.svg'"
+              />
+              <span class="text-gray-800 font-medium">{{ persona.name }}</span>
+            </li>
+          </ul>
+          <p v-else class="text-gray-500 text-center">No te sigue a nadie aún.</p>
         </section>
       </section>
     </div>
